@@ -3,3 +3,4 @@ node_modules/*
 uploads/*
 sql/*
 api/imgs_in_db/*
+venv/*
