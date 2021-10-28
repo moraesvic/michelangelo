@@ -4,3 +4,4 @@ uploads/*
 sql/*
 api/imgs_in_db/*
 venv/*
+__pycache__/*

@@ -1,9 +1,3 @@
-[submodule "lib/mkheader"]
-	path = lib/mkheader
-	url = https://github.com/moraesvic/mkheader
 [submodule "cadmus"]
 	path = install
 	url = https://github.com/moraesvic/cadmus
-[submodule "lib/bash_common"]
-	path = lib/bash_common
-	url = https://github.com/moraesvic/bash_common
