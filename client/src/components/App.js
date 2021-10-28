@@ -13,12 +13,12 @@ const dropdowns =
 function App() {
   return (
     <div className="App">
-        <NavBar dropdowns={dropdowns} title="DA VINCI" />
+        <NavBar dropdowns={dropdowns} title="MICHELANGELO" />
         <MainContent />
         <Footer 
             author="Victor Moraes"
             madeWith="☕"
-            gitHub="https://github.com/moraesvic/davinci"
+            gitHub="https://github.com/moraesvic/michelangelo"
         />
     </div>
   );
