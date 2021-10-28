@@ -1,6 +1,5 @@
 node_modules/*
 *.swp
-.env
 uploads/*
 sql/*
 api/imgs_in_db/*
