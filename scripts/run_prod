@@ -2,10 +2,11 @@
 
 # Activate virtual environment
 this_dir="$(dirname "$0")"
-source "$this_dir/venv/bin/activate"
+root_dir="$this_dir/.."
+source "$root_dir/venv/bin/activate"
 
-(cd "$this_dir/client" && npm run build) || exit 1
-FLASK_APP="$this_dir/app.py"
+(cd "$root_dir/client" && npm run build) || exit 1
+FLASK_APP="$root_dir/app.py"
 export FLASK_ENV="production"
 export PORT=7777
 python3 "$FLASK_APP"

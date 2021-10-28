@@ -30,6 +30,7 @@ class App:
 	STATIC_URL_PATH = "/static"
 	STATIC_FOLDER = "client/build/static"
 	REACT_MAIN_PAGE = "client/build/index.html"
+	REACT_FAVICON = "client/build/favicon.ico"
 	DEFAULT_PORT = 5000
 
 	def __init__(self,
@@ -59,6 +60,7 @@ class App:
 		self.configure_static(nginx_static)
 
 		self.configure_routes()
+		self.configure_favicon()
 		self.configure_fallback()
 
 		self.load_env()
@@ -96,6 +98,15 @@ class App:
 		def front_end(path):
 			print(f"You tried to reach {path}, redirecting to React main page")
 			return send_file(self.REACT_MAIN_PAGE)
+
+	def configure_favicon(self):
+		# This is an exception which must be handled especially. File
+		# "favicon.ico", even though it is static, is normally present in the
+		# root of a domain
+		
+		@self.app.get("/favicon.ico")
+		def serve_favicon():
+			return send_file(self.REACT_FAVICON)
 
 	def load_env(self):
 		from dotenv import load_dotenv
