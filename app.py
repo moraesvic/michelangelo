@@ -4,9 +4,8 @@ import os
 from flask import Flask, jsonify, request, send_file
 from waitress import serve
 
-
-
-
+from lib.singleton import Singleton
+import api.db as db
 
 # @app.route("/stores", methods=["GET"])
 # def form_product():
@@ -26,7 +25,7 @@ from waitress import serve
 # 		return jsonify({"error": True})
 
 
-class App:
+class App (metaclass = Singleton):
 	STATIC_URL_PATH = "/static"
 	STATIC_FOLDER = "client/build/static"
 	REACT_MAIN_PAGE = "client/build/index.html"
@@ -37,7 +36,7 @@ class App:
 				flask_env: str,
 				running_as_main: bool,
 				port: int = DEFAULT_PORT,
-				nginx_static: bool = True):
+				nginx_static: bool = False):
 		'''
 		flask_env contains the value for environment variable "FLASK_ENV", it
 		could be "production" or "development"
@@ -63,9 +62,14 @@ class App:
 		self.configure_favicon()
 		self.configure_fallback()
 
-		self.load_env()
-		print(os.getenv("PG_PASSWORD"))
-		sql_credentials = self.start_db()
+		self.db = db.DB()
+		res = self.db.query("SELECT * FROM example;")
+		print(res.status_msg)
+		print(res.descr)
+		print(res.row_count)
+		print(res.rows)
+
+		self.listen()
 
 
 	def configure_static(self, nginx_static):
@@ -96,25 +100,17 @@ class App:
 		@self.app.get("/", defaults = {"path": ""})
 		@self.app.get("/<path:path>")
 		def front_end(path):
-			print(f"You tried to reach {path}, redirecting to React main page")
+			# print(f"You tried to reach {path}, redirecting to React main page")
 			return send_file(self.REACT_MAIN_PAGE)
 
 	def configure_favicon(self):
 		# This is an exception which must be handled especially. File
 		# "favicon.ico", even though it is static, is normally present in the
 		# root of a domain
-		
+
 		@self.app.get("/favicon.ico")
 		def serve_favicon():
 			return send_file(self.REACT_FAVICON)
-
-	def load_env(self):
-		from dotenv import load_dotenv
-		load_dotenv()
-
-	def start_db(self):
-		import api.db as db
-		self.db = db.DB()
 
 	def listen(self):
 		# app.run() is only called in development and only when command is

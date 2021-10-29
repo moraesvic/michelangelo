@@ -1,12 +1,41 @@
 #!/usr/bin/env bash
 
-get_env="./lib/bash_common/get_env $(dirname "$0")/.env"
+function get_env {
+	# (env_file, key) -> string
 
-user=$($get_env POSTGRES_USER)
-passwd=$($get_env POSTGRES_PASSWORD)
-host=$($get_env POSTGRES_HOST)
-db=$($get_env POSTGRES_DATABASE)
-port=$($get_env POSTGRES_PORT)
+	# A variable can be defined as an empty string
+	# The program can handle this normally.
+	# Note that [ -z $empty_string ] returns true
+	
+	if [ $# -ne 2 ] ; then
+		>&2 echo -e "usage: $0 env_file key"
+		exit 1
+	fi
+
+	env_file="$1"
+	key="$2"
+
+	if [ ! -f "$env_file" ] ; then
+		>&2 echo -e "$env_file is not a file"
+		exit 1
+	fi
+	if [ -z "$key" ] ; then
+		>&2 echo -e "key cannot be empty string"
+		exit 1
+	fi
+
+	sed -rn "s/^$key=(.*)$/\1/p" "$env_file"
+}
+
+this_dir="$(dirname "$0")"
+root_dir="$this_dir/.."
+env_file="$root_dir/.env"
+
+user="$(get_env $env_file POSTGRES_USER)"
+passwd="$(get_env $env_file POSTGRES_PASSWORD)"
+host="$(get_env $env_file POSTGRES_HOST)"
+db="$(get_env $env_file POSTGRES_DATABASE)"
+port="$(get_env $env_file POSTGRES_PORT)"
 
 PGPASSWORD="$passwd" psql -U "$user" -h "$host" -d "$db" -p "$port"
 
