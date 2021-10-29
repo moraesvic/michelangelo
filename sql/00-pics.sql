@@ -1,4 +1,4 @@
-CREATE TABLE pics (
+CREATE TABLE IF NOT EXISTS pics (
     pic_id BIGSERIAL NOT NULL PRIMARY KEY,
     pic_orig_name TEXT NOT NULL,
 	pic_md5 TEXT NOT NULL,

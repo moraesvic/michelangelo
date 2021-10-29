@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request, send_file
 from waitress import serve
 
 from lib.singleton import Singleton
-import api.db as db
+import lib.db as db
 
 # @app.route("/stores", methods=["GET"])
 # def form_product():
@@ -28,6 +28,7 @@ import api.db as db
 class App (metaclass = Singleton):
 	STATIC_URL_PATH = "/static"
 	STATIC_FOLDER = "client/build/static"
+	UPLOAD_FOLDER = "uploads"
 	REACT_MAIN_PAGE = "client/build/index.html"
 	REACT_FAVICON = "client/build/favicon.ico"
 	DEFAULT_PORT = 5000
@@ -56,18 +57,16 @@ class App (metaclass = Singleton):
 		self.port = port or self.DEFAULT_PORT
 
 		self.app = Flask(__name__)
+		self.app.config["UPLOAD_FOLDER"] = self.UPLOAD_FOLDER
 		self.configure_static(nginx_static)
+
+		# It is necessary to connect to DB before configuring routes, because
+		# each route will receive DB as argument
+		self.db = db.DB()
 
 		self.configure_routes()
 		self.configure_favicon()
 		self.configure_fallback()
-
-		self.db = db.DB()
-		res = self.db.query("SELECT * FROM example;")
-		print(res.status_msg)
-		print(res.descr)
-		print(res.row_count)
-		print(res.rows)
 
 		self.listen()
 
@@ -84,8 +83,19 @@ class App (metaclass = Singleton):
 			self.app.static_folder = self.STATIC_FOLDER
 
 	def configure_routes(self):
-		import api.products as products
-		products.Products(self.app)
+		# The idea here is: every module (Products, Pictures, etc) should be
+		# independent, and receive only what is strictly necessary for it to
+		# operate — the app and the DB handlers
+		import api.products, api.pictures
+
+		routes = [
+			api.products.Products,
+			api.pictures.Pictures
+		]
+		
+		for route in routes:
+			route(self.app, self.db)
+
 
 		@self.app.route("/stores/<string:name>", methods=["GET"])
 		def get_store(name):
