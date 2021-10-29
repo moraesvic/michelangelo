@@ -30,13 +30,21 @@ This is a document describing what I intend to achieve with this project — wha
 
 ### Once validated, pictures must be stored in the filesystem in an efficient way, regarding disk usage. For that goal, picture resizing, re-encoding and compression can be used.
 
-1. The client will make requests to 8-10 pictures at a time, and this can be a bottleneck, especially when downloaded over a mobile network.
+1. Image resolution has to have minimal dimension of 200 pixels (either width or height)
 
-2. Client tests must be run using throttling. Values for the slowest throttling mode, **corresponding roughly to a slow 3G connection**: download rate 450 kbit/s, upload rate 150 kbit/s, latency 250ms.
+2. The client will make requests to 8-10 pictures at a time, and this can be a bottleneck for user experience, especially when download occurs over a mobile network.
 
-3. In the slowest throttling mode, DOMContentLoaded should happen in **less than 5 seconds**. Transfer of all resources for the page must happen in **less than 10 seconds**.
+3. Client tests must be run using throttling. Values for the slowest throttling mode, **corresponding roughly to a slow 3G connection**: download rate 450 kbit/s, upload rate 150 kbit/s, latency 250ms.
 
-4. To achieve that, a good benchmark is: the average picture size should not be larger than 70 KB (before gzip compression).
+4. In the slowest throttling mode, DOMContentLoaded should happen in **less than 5 seconds**. Transfer of all resources for the page must happen in **less than 10 seconds**.
+
+5. To achieve that, a good benchmark is: the average picture size should not be larger than 70 KB (before gzip compression).
+
+### The API endpoints can be benchmarked with "ab" (Apache Benchmark)
+
+1. It does not make a lot of sense, because the performance depends on what machine is running the server, database size, among others. But it is at least an indicator we can use to compare different approaches and frameworks
+
+2. It is reasonable to expect that the API can complete at least 50 JSON GET requests per second, when 50 users try to connect simultaneously, [using KeepAlive header and accepting compression](https://stackoverflow.com/questions/12732182/ab-load-testing) ("ab -k -H "Accept-Encoding: gzip, deflate" -n 500 -c 50 path/to/api")
 
 ### There will be no authentication. In a real case scenario, this would be a must, but it is not expected to be implemented within the limited given timeframe.
 

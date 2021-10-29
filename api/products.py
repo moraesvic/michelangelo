@@ -67,9 +67,11 @@ def Products(app, db):
         pic_id = None
         pic_file = req.files.get("picture")
         if pic_file and len(pic_file.filename):
+            print(pic_file)
+            print(type(pic_file))
             upload_folder = app.config["UPLOAD_FOLDER"]
             filename = secure_filename(pic_file.filename)
-            pic_file.save(os.path.join(upload_folder, filename))
+            # pic_file.save(os.path.join(upload_folder, filename))
             # ... process picture and attribute pic_id ...
 
         # Picture was already saved in database and in filesystem
@@ -121,9 +123,6 @@ def Products(app, db):
             # ... remove picture ... #
             print(f"An unexpected error happened when inserting product in database: {str(e)}")
             return Response("Internal server error", status = 500)           
-
-
-        
 
     @app.delete("/products/all")
     def delete_products_all():

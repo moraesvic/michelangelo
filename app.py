@@ -33,6 +33,9 @@ class App (metaclass = Singleton):
 	REACT_FAVICON = "client/build/favicon.ico"
 	DEFAULT_PORT = 5000
 
+	# We will allow a maximum payload size of 5 MB
+	MAX_CONTENT_LENGTH = 5 * 1024 * 1024
+
 	def __init__(self,
 				flask_env: str,
 				running_as_main: bool,
@@ -58,6 +61,8 @@ class App (metaclass = Singleton):
 
 		self.app = Flask(__name__)
 		self.app.config["UPLOAD_FOLDER"] = self.UPLOAD_FOLDER
+		self.app.config["MAX_CONTENT_LENGTH"] = self.MAX_CONTENT_LENGTH
+
 		self.configure_static(nginx_static)
 
 		# It is necessary to connect to DB before configuring routes, because

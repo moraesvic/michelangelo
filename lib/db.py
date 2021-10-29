@@ -73,7 +73,6 @@ class DB (metaclass = Singleton):
 
         try:
             self.conn = self.connect()
-            self.cur = self.get_cursor()
         except Exception as e:
             print(f"Connection to database could not be established!\n{str(e)}")
 
@@ -89,24 +88,36 @@ class DB (metaclass = Singleton):
     def connect(self):
         return psycopg2.connect(**self.get_sql_env())
 
-    def get_cursor(self):
-        return self.conn.cursor()
-
     def query(self, fmtstr: str, args: tuple = tuple() ):
         # Strip formated string of whitespace
         stripped = fmtstr.strip()
         if stripped[-1] != ";":
             print("Warning: SQL command was not terminated with semi-colon")
 
+        # We need to get the cursor here. For the same connection, many
+        # cursors can be active, and we need one per query, if we don't
+        # want to run into race conditions
+
         try:
-            self.cur.execute(stripped, args)
-            return QueryResult(
-                self.cur.statusmessage,
-                self.cur.description,
-                self.cur.rowcount,
-                self.cur.fetchall()
+            cur = self.conn.cursor()
+        except:
+            print("Could not get a cursor!")
+            return None
+
+        try:
+            cur.execute(stripped, args)
+            query_result = QueryResult(
+                cur.statusmessage,
+                cur.description,
+                cur.rowcount,
+                cur.fetchall()
             )
+            cur.close()
+            return query_result
+            
         except Exception as e:
-            print(f"Error! SQL command <{stripped}> raised an error: {str(e)}")
+            cmd = cur.mogrify(stripped, args).decode("utf-8")
+            cur.close()
+            print(f"Error! SQL command <{cmd}> raised an error: {str(e)}")
             return None
         
