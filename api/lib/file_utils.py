@@ -1,7 +1,6 @@
 import time, os, re, subprocess, math, random
 from typing import Tuple, List
 
-
 # Range of random values to name a file
 NEW_NAME_MAX_RND = 10 ** 9
 
@@ -78,18 +77,7 @@ def rename_mime_type(path: str, subtype: str = None) -> str:
     else:
         _, file_subtype = get_mime_type(path)
 
-    # We do not want something like file.png.png, so we have to check if
-    # file already has the extension
-    regex = re.compile(rf"^.+?\.({file_subtype})$", re.IGNORECASE)
-    basename = os.path.basename(path)
-
-    if not regex.search(basename):
-        new_path = f"{path}.{file_subtype}"
-        os.rename(path, new_path)
-    else:
-        new_path = path
-
-    return new_path
+    return append_extension(path, file_subtype)
     
 def test_and_rename_mime_type(path: str, accepted_types: List[str]) -> str:
     """
@@ -128,3 +116,24 @@ def get_md5_hash(path: str) -> str:
         raise Exception("Failed to calculate MD5 hash for file!")
 
     return match.groups()[0]
+
+
+def append_extension(path: str, extension: str) -> str:
+    """
+    Renames file, appending extension to it, but only if it hasn't already
+    got the extension
+    """
+
+    # We do not want something like file.png.png, so we have to check if
+    # file already has the extension
+
+    regex = re.compile(rf"^.+?\.({extension})$", re.IGNORECASE)
+    basename = os.path.basename(path)
+
+    if not regex.search(basename):
+        new_path = f"{path}.{extension}"
+        os.rename(path, new_path)
+    else:
+        new_path = path
+
+    return new_path

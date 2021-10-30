@@ -3,6 +3,13 @@
 this_dir="$(dirname "$0")"
 root_dir="$this_dir/.."
 
+# Generate large file for testing
+
+large_file="$root_dir/tests/test_files/large_file.bin"
+if [ ! -f "$large_file" ] ; then
+    dd if=/dev/urandom of="$large_file" bs=1024 count=$((10 * 1024))
+fi
+
 for file in $root_dir/tests/*.py ; do
     module_name="$(basename "$file")"
     echo "running test ${module_name%%.*}"

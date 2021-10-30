@@ -2,8 +2,6 @@ from flask import jsonify, request as req, Response
 import math
 from werkzeug.utils import secure_filename
 
-from . import pictures
-
 def Products(app, db):
     @app.get("/list-products")
     def get_list_products():

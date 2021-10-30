@@ -1,2 +1,0 @@
-import tests.file_upload_test
-import tests.file_utils_test
