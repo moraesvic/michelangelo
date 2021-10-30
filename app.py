@@ -4,8 +4,8 @@ import os
 from flask import Flask, jsonify, request, send_file
 from waitress import serve
 
-from lib.singleton import Singleton
-import lib.db as db
+from api.lib.singleton import Singleton
+import api.lib.db as db
 
 # @app.route("/stores", methods=["GET"])
 # def form_product():

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+this_dir="$(dirname "$0")"
+root_dir="$this_dir/.."
+
+for file in $root_dir/tests/*.py ; do
+    module_name="$(basename "$file")"
+    echo "running test ${module_name%%.*}"
+    python3.8 -m "tests.${module_name%%.*}"
+done

@@ -19,3 +19,6 @@ __pycache__/*
 # port 5432.
 
 # .env
+
+# Large binary file used for testing
+api/test_files/large_file.bin

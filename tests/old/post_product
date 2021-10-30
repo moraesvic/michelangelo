@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+path=/home/dinossauro/img/
+
+function random_img {
+	n_files=$(ls -1 "$path" | wc -l)
+	random=$(( RANDOM % n_files + 1 ))
+	ls -1 "$path" | sed -n "${random}p"
+}
+
+function post_product {
+	curl -X POST \
+		-F "picture=@$path$(random_img)" \
+		-F "prodName=$1" \
+		-F "prodDescr=$2" \
+		-F "prodPrice=$3" \
+		-F "prodInStock=$4" \
+		localhost:3000/davinci/products
+}
+
+# Test 1 : playing nice and supplying all fields
+post_product "Thermometer" "An instrument made for measuring temperature. Keep away from children!" "9.99" "10"
+
+# Test 2 : not supplying description (it is not a mandatory field)
+post_product "Candles (contains 6)" "" "1.49" "87"
+
+# Test 3 : not supplying name (it is a mandatory field and should send out an error)
+post_product "" "Who knows what that was supposed to be?" "1234.56" "1"
+
+# Test 4 : supplying price value with too many decimal places (should not give error, but additional digits will be truncated)
+post_product "Microscope" "I guess that wasn't even invented in the Renaissance, but certainly a Renaissance fellow could benefit from it" "3.141596535" "12"
+
+# Test 5 : supplying non-integer to "in stock" (decimal digits will be truncated, no error expected)
+post_product "Magnifying glass" "See better, see bigger" "3.44" "6.99"
+
+# Test 6 : supplying negative value for price (should give an error)
+# Not necessary to repeat for "in-stock", since the logic is the same
+post_product "Dirty laundry" "I will pay you to take that away from me" "-10.99" "1"
+
+# Test 7 : supplying non-numeric value for price (should produce an error)
+# Same goes for "in-stock"
+post_product "Blob" "Some unknown thing from some unknown origin" "AShgjF" "1"
+

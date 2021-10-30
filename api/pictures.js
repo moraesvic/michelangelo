@@ -5,57 +5,6 @@ const Multer  = require('multer');
 const DB = require("./db");
 const chpr = require('./ChildProcess.js');
 
-function pad(num, size) {
-    num = num.toString();
-    while (num.length < size) num = "0" + num;
-    return num;
-}
-
-function uploadFactory(filename, sizeLimit)
-{
-    const storage = Multer.diskStorage({
-        destination: function (req, file, cb) {
-            cb(null, 'uploads/')
-        },
-        filename: function (req, file, cb) {
-            const name = Date.now()
-                + '-' + pad(Math.round(Math.random() * 1E9), 9);
-            
-            /* We cannot simply count with original file extension, because
-             * user could simply rename an executable as .jpeg 
-             * We will deal with this matter outside of Multer middleware */
-
-            /* Unix allows up to 255 characters in file names
-             * This does not include path. With path, it can go up to 4096
-             * Anyway, let's leave a fat margin */
-
-            if (name.length > 192)
-                cb("File name is too long!")
-            else
-                cb(null, name);
-        }
-    });
-
-    function checkFileType(file, cb){
-        /* Reserved for future use */
-        return cb(null, true);        
-    }
-
-	const upload = Multer({
-		storage: storage,
-        limits: {
-            /* renamed filename will be checked by fileFilter as well */
-            fieldNameSize: 192,
-            fileSize: sizeLimit
-        },
-        fileFilter: function(req, file, cb){
-            checkFileType(file, cb);
-        }
-	});
-
-	return upload.single(filename);
-}
-
 function processPicture(req, res, fieldName)
 {
     return new Promise( (resolve, reject) => {
@@ -69,54 +18,12 @@ function processPicture(req, res, fieldName)
     }); 
 }
 
-async function getMimeType(path)
-{
-    /* (fileStatus) -> [type, subtype] */
-    /* Get REAL mime-type. Multer's implementation is not correct */
-
-    /* This will output something like image/png, image/jpeg, text/plain */
-    const [mimetype, _] = await chpr(
-        `file --mime-type "${path}" | sed -rn "s/^.+[[:space:]]+(.*)$/\\1/p"`);
-    const [type, subtype] = mimetype.replace("\n" , "").split("/");
-
-    return [type, subtype];
-}
-
-async function testMimeType(path, allowed)
-{
-    /* (fileStatus, string / list) -> [type, subtype] */
-    const [type, subtype] = await getMimeType(path);
-
-    if (typeof(allowed) === "string")
-        allowed = [allowed];
-
-    if (!allowed.includes(type))
-        throw `"${type}" is not an allowed type!`;
-
-    return [type, subtype];
-}
-
-async function renameMimeType(path, subtype = null)
-{
-    if (!subtype)
-        [, subtype] = await getMimeType(path);
-
-    const newPath = appendExtension(path, subtype);
-    return newPath;
-}
 
 async function stripPicMetadata(path)
 {
     await chpr(`
     exiftool -overwrite_original -all= "${path}"
     `);
-}
-
-async function md5File(path)
-{
-    const cmd = `md5sum "${path}" | cut -d" " -f1 | tr -d "\n"`;
-    const [md5sum, ] = await chpr(cmd);
-    return md5sum;
 }
 
 async function getPicResolution(path)
@@ -241,23 +148,6 @@ async function resizePic(path, maxSize, convertToJPEG = true, benchmark = true)
         `
         );
     }
-}
-
-async function appendExtension(path, extension)
-{
-    /* appends an extension to a file, if it does not already have it */
-    let newPath;
-    const currentExt = Path.extname(path);
-
-    if (currentExt !== extension) {
-        const dir = Path.dirname(path);
-        const fileWithoutExtension = Path.basename(path, currentExt);
-        newPath = `${dir}/${fileWithoutExtension}.${extension}`;
-    } else
-        newPath = path;
-
-    await fsPromises.rename(path, newPath);
-    return newPath;
 }
 
 function storePicture(fileStatus, allowRedundant = false)

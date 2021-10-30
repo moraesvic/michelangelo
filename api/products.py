@@ -1,5 +1,5 @@
 from flask import jsonify, request as req, Response
-import os, math
+import math
 from werkzeug.utils import secure_filename
 
 from . import pictures
