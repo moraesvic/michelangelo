@@ -78,10 +78,9 @@ def save_file(
         file_storage.save(new_path)
         file_size = os.path.getsize(new_path)
     
-    if max_size == 0 or file_size > max_size:
+    if max_size != 0 and file_size > max_size:
         if not check_size_before_saving:
-            # ... remove file ...
-            pass
+            os.remove(new_path)
         raise Exception("File is too large!")
 
     elif check_size_before_saving:
