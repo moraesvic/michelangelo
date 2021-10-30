@@ -1,4 +1,4 @@
-import os, random, time
+import os, random, time, math
 
 # We will need to import this, as native support to "list of integers" kind
 # of type hinting was only added in Python3.9
@@ -13,11 +13,8 @@ from werkzeug.datastructures import FileStorage
 # perhaps by accessing app.config["MAX_CONTENT_LENGTH"]
 FILE_MAX_SIZE = 5 * 1024 * 1024
 
-# Check if it is a file:
-# os.path.isfile(file)
-
-# Check file size
-# os.path.getsize(path)
+# Range of random values to name a file
+NEW_NAME_MAX_RND = 10 ** 9
 
 def get_new_name() -> str:
     # Unix allows up to 255 characters in file names.
@@ -31,10 +28,12 @@ def get_new_name() -> str:
     # Now seems unlikely, but if there are many requests, it will
     # probably happen at some point. So we generate a random number
     # between 0 and 1 billion and append it to the name
-    random_number = f"{random.randint(0, 10**9 - 1):09}"
+
+    random_number_length = round(math.log10(NEW_NAME_MAX_RND))
+    random_number = str(
+        random.randint(0, NEW_NAME_MAX_RND - 1)).zfill(random_number_length)
 
     return f"{seconds}-{random_number}"
-
 
 def save_file(
             file_storage: FileStorage,
