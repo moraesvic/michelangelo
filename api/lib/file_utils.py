@@ -137,3 +137,39 @@ def append_extension(path: str, extension: str) -> str:
         new_path = path
 
     return new_path
+
+def compare_size_apply_changes(
+        old_path: str,
+        new_path: str,
+        print_stats: bool = False,
+        operation_name: str = ""):
+    """
+    Receives two paths, old_path represents the original file and
+    new_path the file after an operation (converting, resizing, 
+    compressing, etc.)
+
+    Checks if such operation indeed reduced file size, and apply changes
+    or reverts operation (leaves original file)
+
+    operation_name is an optional argument, which can be used for
+    debugging and benchmarking
+    """
+    old_size = os.path.getsize(old_path)
+    new_size = os.path.getsize(new_path)
+
+    if print_stats:
+        diff = old_size - new_size
+        percentage = diff / old_size * 100.0
+        verb = "reduced" if diff > 0 else "increased"
+        if len(operation_name):
+            print(f"operation {operation_name}")
+        print(f"old_path = {old_path}")
+        print(f"new_path = {new_path}")
+        print(f"File {verb} in {abs(diff)} bytes ({percentage:.2f}%)")
+
+    if old_size <= new_size:
+        print("Operation was not effective. Reverting.")
+        os.remove(new_path)
+    else:
+        print("Operation was successful. Applying changes.")
+        os.rename(new_path, old_path)

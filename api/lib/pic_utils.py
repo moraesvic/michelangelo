@@ -1,7 +1,7 @@
 import subprocess, re, math, os, secrets
 from typing import Tuple
 
-from .file_utils import get_mime_type, test_mime_type
+from .file_utils import get_mime_type, test_mime_type, compare_size_apply_changes
 
 def strip_pic_metadata(path: str) -> None:
     arg = f"exiftool -overwrite_original -all= \"{path}\""
@@ -54,10 +54,9 @@ def resize(path: str, max_size: int) -> None:
     
     #
     # ...
-    #
+    # 
 
-def compare_size_apply_changes(old_path: str, new_path: str) -> str:
-    pass
+
 
 def convert(path: str, new_type: str = "jpeg") -> None:
     """
@@ -71,10 +70,6 @@ def convert(path: str, new_type: str = "jpeg") -> None:
     if file_subtype == new_type:
         # Nothing to do, file is already in the desired format
         return
-    
-    # We need to save original size, to be able to compare later
-    # and see if the operation in fact reduced picture size
-    old_size = os.path.get_size(path)
 
     # Name is only temporary, picture will be overwritten
     # Let's add a random suffix, we do not want to overwrite another
@@ -92,24 +87,15 @@ def convert(path: str, new_type: str = "jpeg") -> None:
     except:
         raise Exception("An error occurred while converting file")
 
-    new_size = os.path.getsize(new_path)
-
-    if new_size < old_size:
-        # Good, let's overwrite original
-        # ...
-        pass
-    else:
-        # The intention was to reduce file size... we need to revert
-        # what we did
-        # ...
-        pass
-
-
-
-print(
-    calculate_proportion(
-        get_pic_resolution("../../tests/test_files/logo.png"),
-        1999
+    compare_size_apply_changes(
+        path,
+        new_path,
+        True,
+        "converting"
     )
-)
+
+
+realpath = os.path.realpath("tests/test_files/bears_alt.png")
+print(realpath)
+convert(realpath)
 
