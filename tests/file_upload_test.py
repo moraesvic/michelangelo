@@ -1,8 +1,8 @@
 import sys, time, re, random, math, unittest, subprocess
 from werkzeug.datastructures import FileStorage
 
-from api.lib.file_upload import *
-from api.lib.file_utils import NEW_NAME_MAX_RND
+from lib.file_upload import *
+from lib.file_utils import N_RANDOM_BYTES
 
 NUMBER_OF_TESTS = 50
 VERBOSE = any([re.search(r"-v", arg) for arg in sys.argv])
@@ -77,8 +77,8 @@ class FileUploadTest(unittest.TestCase):
 
     def get_filename_regex(self):
         milliseconds_length = len(str(int(time.time() * 1000)))
-        random_number_length = round(math.log10(NEW_NAME_MAX_RND))
-        return re.compile(r"[0-9]{%d}-[0-9]{%d}" % (
+        random_number_length = N_RANDOM_BYTES * 2
+        return re.compile(r"[0-9]{%d}-[0-9a-f]{%d}" % (
             milliseconds_length, random_number_length))
 
     def test_get_new_name(self):

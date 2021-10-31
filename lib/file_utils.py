@@ -1,8 +1,8 @@
-import time, os, re, subprocess, math, random
+import time, os, re, subprocess, math, random, secrets
 from typing import Tuple, List
 
 # Range of random values to name a file
-NEW_NAME_MAX_RND = 10 ** 9
+N_RANDOM_BYTES = 4
 
 def get_new_name() -> str:
     # Unix allows up to 255 characters in file names.
@@ -15,19 +15,15 @@ def get_new_name() -> str:
     # What if two files are uploaded in the same millisecond ?
     # Now seems unlikely, but if there are many requests, it will
     # probably happen at some point. So we generate a random number
-    # between 0 and 1 billion and append it to the name
+    # and append it to the name
 
-    # In the future, it might be interesting to replace this with
-    # secrets.token_hex(4)
     # 4 bytes already generate a bit over 4 billion possibilities,
     # with a shorter filename, and more secure entropy source
     # https://docs.python.org/3/library/secrets.html
 
-    random_number_length = round(math.log10(NEW_NAME_MAX_RND))
-    random_number = str(
-        random.randint(0, NEW_NAME_MAX_RND - 1)).zfill(random_number_length)
+    random_token = secrets.token_hex(N_RANDOM_BYTES)
 
-    return f"{seconds}-{random_number}"
+    return f"{seconds}-{random_token}"
 
 
 def get_mime_type(path: str) -> Tuple[str, str]:

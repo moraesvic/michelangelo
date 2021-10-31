@@ -1,7 +1,8 @@
-import subprocess, re, math, os, secrets
+import subprocess, re, math, os
 from typing import Tuple
 
-from .file_utils import get_mime_type, test_mime_type, compare_size_apply_changes
+from .file_utils import get_mime_type, test_mime_type, \
+    compare_size_apply_changes, get_new_name
 
 def strip_pic_metadata(path: str) -> None:
     arg = f"exiftool -overwrite_original -all= \"{path}\""
@@ -72,10 +73,10 @@ def convert(path: str, new_type: str = "jpeg") -> None:
         return
 
     # Name is only temporary, picture will be overwritten
-    # Let's add a random suffix, we do not want to overwrite another
+    # Let's use a random name, we do not want to overwrite another
     # file on the same directory by mistake
-    random_suffix = secrets.token_hex(4)
-    new_path = f"{path}-{random_suffix}.{new_type}"
+    new_basename = f"{get_new_name()}.{new_type}"
+    new_path = os.path.join(os.path.dirname(path), new_basename)
     arg = f"convert \"{path}\" \"{new_path}\""
 
     try:
