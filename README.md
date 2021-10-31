@@ -12,13 +12,13 @@ React is intended for single-page apps and its documentation is sometimes a bit 
 
 A work around this was checking if we are running in development mode and appending a prefix to every route. Something like:
 
-`
+```
 @app.get(f"{prefix}/list-products")
-`
+```
 
 It is not beautiful or practical, and we should use a better solution in the future. For the while, it enables to work with development or production mode at the same URL (http://localhost/michelangelo), without having to change configuration files to deploy. Make sure you add this to your server block in nginx:
 
-`
+```
 location = /michelangelo {
 	return 302 /michelangelo/;
     }
@@ -31,6 +31,6 @@ location /michelangelo/ {
     # random number within the expected range
     proxy_pass         http://localhost:7777/michelangelo/;
 }
-`
+```
 
 Hosting this app in other paths is possible, just change the value for APP_NAME in the ".env" file for the back-end, and the value of PUBLIC_URL in the ".env" file in the front-end. The port numbers are also completely arbitrary, and anything should work as long as you are consistent across files. Later I might also add a script that solves all this at once.
