@@ -22,7 +22,8 @@ class App (metaclass = Singleton):
 				flask_env: str,
 				running_as_main: bool,
 				port: int = DEFAULT_PORT,
-				nginx_static: bool = False):
+				nginx_static: bool = False,
+				app_name: str = ""):
 		'''
 		flask_env contains the value for environment variable "FLASK_ENV", it
 		could be "production" or "development"
@@ -40,6 +41,8 @@ class App (metaclass = Singleton):
 		self.production_mode = (flask_env == "production")
 		self.running_as_main = running_as_main
 		self.port = port or self.DEFAULT_PORT
+		self.app_name = app_name
+		self.prefix = f"/{self.app_name}" if self.production_mode == False else ""
 
 		self.app = Flask(__name__)
 		self.app.config["UPLOAD_FOLDER"] = self.UPLOAD_FOLDER
@@ -81,7 +84,7 @@ class App (metaclass = Singleton):
 		]
 		
 		for route in routes:
-			route(self.app, self.db)
+			route(self.app, self.db, self.prefix)
 
 
 		@self.app.route("/stores/<string:name>", methods=["GET"])
@@ -138,7 +141,12 @@ class App (metaclass = Singleton):
 
 flask_env = os.environ.get("FLASK_ENV", None)
 port = os.environ.get("PORT", None)
-app_singleton = App(flask_env, __name__ == "__main__", port)
+app_name = os.environ.get("APP_NAME", None)
+app_singleton = App(
+	flask_env,
+	__name__ == "__main__",
+	port = port,
+	app_name = app_name)
 
 # This is required in order to have "flask run"
 app = app_singleton.app

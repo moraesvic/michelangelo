@@ -1,12 +1,35 @@
-def Pictures(app, db):
-    @app.get("/pictures/<int:id>")
+from flask import request as req
+import lib.file_upload as file_upload
+
+def Pictures(
+        app,
+        db,
+        prefix):
+    
+    @app.get(f"{prefix}/pictures/<int:id>")
     def get_picture_by_id(id):
         pass
 
-    @app.delete("/pictures/all")
+    @app.delete(f"{prefix}/pictures/all")
     def delete_pictures_all():
         pass
 
-    @app.post("/pictures")
+    @app.post(f"{prefix}/pictures")
     def post_picture():
-        pass
+        pic_id = None
+        pic_file = req.files.get("picture")
+        if pic_file and len(pic_file.filename):
+        
+            try:
+                pic_path = file_upload.save_file(
+                    pic_file,
+                    upload_path = app.config["UPLOAD_FOLDER"],
+                    max_size = app.config["MAX_CONTENT_LENGTH"],
+                    check_size_before_saving = True
+                )
+                return pic_path
+            except:
+                return "errrorrrrrrr"
+        
+        else:
+            return "you did not send anything :)"

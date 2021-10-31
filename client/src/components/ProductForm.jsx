@@ -8,6 +8,7 @@ function ProductForm(props) {
     of files are accepted */
 
     const fieldName = props.fieldName || "file";
+    let file = null;
 
     let formDict = {};
 
@@ -20,16 +21,32 @@ function ProductForm(props) {
     const handleFile = (e) => {
         const MAX_FILE_SIZE = 5 * 1024 * 1024 ; // 5 megabytes
         const maxFileSizeMB = Math.round(MAX_FILE_SIZE / 1024 / 1024);
-        const file = e.target.files[0];
+        file = e.target.files[0];
         if (file.size > MAX_FILE_SIZE) {
-            alert(`Your file is too large! We accept up to ${maxFileSizeMB} megabytes.`)
+            alert(`Your file is too large! We accept up to ${maxFileSizeMB} megabytes.`);
+            file = null;
             return;
         }
-        formDict[`${fieldName}`] = file;
+        alert("file successfully loaded")
     }
-  
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        /* First let's send the file, if there's any */
+        if (file) {
+            let fileForm = new FormData();
+            fileForm.append(fieldName, file);
+            console.log(fileForm);
+            let ret = await fetch(
+                "pictures", {
+                    method: "POST",
+                    data: fileForm
+                }
+            );
+            console.log(ret);
+            console.log(ret.json());
+        }
 
         let data = new FormData();
         for (let [key, value] of Object.entries(formDict))
