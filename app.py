@@ -4,26 +4,8 @@ import os
 from flask import Flask, jsonify, request, send_file
 from waitress import serve
 
-from api.lib.singleton import Singleton
-import api.lib.db as db
-
-# @app.route("/stores", methods=["GET"])
-# def form_product():
-# 	pass
-
-# @app.route("/stores", methods=["POST"])
-# def post_product():
-# 	try:
-# 		request_data = request.get_json()
-# 		new_store = {
-# 			"name": request_data["storeName"],
-# 			"sector": request_data["storeSector"],
-# 			"items": list()
-# 		}
-# 		return jsonify(new_store)	
-# 	except:
-# 		return jsonify({"error": True})
-
+from lib.singleton import Singleton
+import lib.db as db
 
 class App (metaclass = Singleton):
 	STATIC_URL_PATH = "/static"

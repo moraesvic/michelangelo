@@ -1,6 +1,6 @@
 Development environment for michelangelo (31/10/2021)
 
-Please note that it is not STRICTLY required that EVERYTHING below follows the given version. For example, you will likely be fine running other Linux distro, another version of nginx, PostgreSQL and so on. Even the command line utils can probably be replaced and the end-user would be well served. However, one test or another might fail, and if you wonder why, this could be a place to start.
+Please note that it is not STRICTLY required that EVERYTHING below follows the given version. For example, you will likely be fine running other Linux distro, another version of nginx, PostgreSQL and so on. Tests are designed to be tolerant enough and do not expect absolutely exact output, unless it is really necessary. In spite of that, if you have a problem reproducing the app's behavior, this could be a place to start debugging.
 
 >>> Let's start with system requirements:
 $ uname -a
@@ -65,4 +65,14 @@ Copyright: © 1999-2019 ImageMagick Studio LLC
 License: https://imagemagick.org/script/license.php
 Features: Cipher DPC Modules OpenMP
 Delegates (built-in): bzlib djvu fftw fontconfig freetype jbig jng jpeg lcms lqr ltdl lzma openexr pangocairo png tiff webp wmf x xml zlib
+
+$ compare -version
+Version: ImageMagick 6.9.10-23 Q16 x86_64 20190101 https://imagemagick.org
+Copyright: © 1999-2019 ImageMagick Studio LLC
+License: https://imagemagick.org/script/license.php
+Features: Cipher DPC Modules OpenMP
+Delegates (built-in): bzlib djvu fftw fontconfig freetype jbig jng jpeg lcms lqr ltdl lzma openexr pangocairo png tiff webp wmf x xml zlib
+
+$ cloc --version
+1.82
 

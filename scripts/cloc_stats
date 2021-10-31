@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# Prints statistics on number of code lines per language
+
+this_dir="$(dirname "$0")"
+root_dir="$this_dir/.."
+
+cd $root_dir
+echo "----- STATISTICS FOR THE BACK-END -----"
+cloc . --exclude-dir=venv,client
+
+echo "----- STATISTICS FOR THE FRONT-END -----"
+cd client
+cloc . --exclude-dir=node_modules,build --exclude-ext=json

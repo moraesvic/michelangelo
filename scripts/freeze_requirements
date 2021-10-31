@@ -53,11 +53,13 @@ dd_version="dd --version"
 file_version="file -v"
 exiftool_version="exiftool -ver"
 convert_version="convert -version"
+compare_version="compare -version"
+cloc_version="cloc --version"
 
 ###
 
 printr "Development environment for $project_name ($(date +%d/%m/%Y))"
-printr "\nPlease note that it is not STRICTLY required that EVERYTHING below follows the given version. For example, you will likely be fine running other Linux distro, another version of nginx, PostgreSQL and so on. Even the command line utils can probably be replaced and the end-user would be well served. However, one test or another might fail, and if you wonder why, this could be a place to start."
+printr "\nPlease note that it is not STRICTLY required that EVERYTHING below follows the given version. For example, you will likely be fine running other Linux distro, another version of nginx, PostgreSQL and so on. Tests are designed to be tolerant enough and do not expect absolutely exact output, unless it is really necessary. In spite of that, if you have a problem reproducing the app's behavior, this could be a place to start debugging."
 
 printr "\n>>> Let's start with system requirements:"
 simulate_command $uname_a
@@ -79,3 +81,5 @@ simulate_command $git_version
 simulate_command $dd_version
 simulate_command $exiftool_version
 simulate_command $convert_version
+simulate_command $compare_version
+simulate_command $cloc_version

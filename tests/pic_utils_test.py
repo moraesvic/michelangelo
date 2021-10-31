@@ -40,17 +40,23 @@ class FileUploadTest(unittest.TestCase):
     # Now, we have a problem. Compression and resizing algorithms are NOT
     # deterministic. This means that every time we run the command, the output
     # could vary slightly. Besides that, metadata could be changed while image
-    # data remains identical. A MD5 hash is NOT appropriate for checking if the
-    # conversion was correctly done.
-
+    # data remains identical. Last but not least, somebody could be running
+    # a different version of ImageMagick, or a different dependency for 
+    # ImageMagick, who knows.
+    # 
+    # A MD5 hash is NOT appropriate for checking if the conversion was 
+    # correctly done.
+    #
     # We will need to use ImageMagick's compare. As a metric, we will use "NCC"
     # (Normalized Cross Correlation), and define that two images are identical
-    # if they have NCC > 99%
-
+    # if they have NCC > 99% (this is actually very forgiving, probably any
+    # human would be able to tell they are different at this point — maybe
+    # 99.9% would be better).
+    #
     # It is not really obvious what these metrics mean and what kind of
     # tolerance should be expected, so I had to run some tests:
     # https://github.com/moraesvic/img_compare
-
+    #
     # https://stackoverflow.com/questions/6380818/imagemagick-making-different-images-on-windows-and-linux
     # https://askubuntu.com/questions/209517/does-diff-exist-for-images
 
