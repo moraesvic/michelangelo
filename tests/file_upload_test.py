@@ -1,20 +1,9 @@
-import sys, time, re, random, math, unittest, subprocess
+import time, re, random, unittest, subprocess
 from werkzeug.datastructures import FileStorage
 
 from lib.file_upload import *
 from lib.file_utils import N_RANDOM_BYTES
-
-NUMBER_OF_TESTS = 50
-VERBOSE = any([re.search(r"-v", arg) for arg in sys.argv])
-
-def printv(s: str):
-    """Prints string s if running in verbosity mode"""
-    if VERBOSE:
-        print(s)
-
-def rel_path(path):
-    this_dir = os.path.dirname(os.path.realpath(__file__))
-    return os.path.join(this_dir, path)
+from tests.test_common import *
 
 class FileUploadTest(unittest.TestCase):
 
@@ -23,11 +12,6 @@ class FileUploadTest(unittest.TestCase):
 
     open_files = []
     tmp_files = []
-
-    # Let's say we rename a file A to the name B. We need to keep track
-    # of this and then revert these changes in the end
-
-    revert_name = []
 
     def open_file(self, path):
         # A wrapper to open files safely into a Werkzeug object
@@ -69,11 +53,6 @@ class FileUploadTest(unittest.TestCase):
         printv("Removing temporary files")
         for file in cls.tmp_files:
             os.remove(file)
-
-        printv("Reverting file names")
-        for name_pair in cls.revert_name:
-            printv(f"renaming {name_pair[0]} to {name_pair[1]}")
-            os.rename(name_pair[0], name_pair[1])
 
     def get_filename_regex(self):
         milliseconds_length = len(str(int(time.time() * 1000)))
@@ -146,5 +125,5 @@ class FileUploadTest(unittest.TestCase):
         self.assertRegex(file_basename, self.get_filename_regex())
         self.tmp_files.append(file_path)
 
-# if __name__ == "__main__":
-unittest.main()
+if __name__ == "__main__":
+    unittest.main()

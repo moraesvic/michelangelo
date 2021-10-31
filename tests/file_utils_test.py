@@ -1,26 +1,13 @@
-import sys, time, re, random, math, unittest, subprocess
-from werkzeug.datastructures import FileStorage
+import time, re, random, unittest, subprocess
 
 from lib.file_utils import *
-
-NUMBER_OF_TESTS = 50
-VERBOSE = any([re.search(r"-v", arg) for arg in sys.argv])
-
-def printv(s: str):
-    """Prints string s if running in verbosity mode"""
-    if VERBOSE:
-        print(s)
-
-def rel_path(path):
-    this_dir = os.path.dirname(os.path.realpath(__file__))
-    return os.path.join(this_dir, path)
+from tests.test_common import *
 
 class FileUploadTest(unittest.TestCase):
 
     # When we are done with tests, we need to close files and remove
     # all files saved to disk
 
-    open_files = []
     tmp_files = []
 
     # Let's say we rename a file A to the name B. We need to keep track
@@ -28,30 +15,8 @@ class FileUploadTest(unittest.TestCase):
 
     revert_name = []
 
-    def open_file(self, path):
-        # A wrapper to open files safely into a Werkzeug object
-        filename = rel_path(path)
-        fd = open(filename, 'rb')
-        self.open_files.append(fd)
-        return FileStorage(fd)
-
-    def get_valid_file(self):
-        # This refers to a normal tiny text file
-        return self.open_file("test_files/normal_file.txt")
-
-    def get_large_file(self):
-        # This refers to a 10MB file with random binary data, generated with
-        # "dd if=/dev/urandom of=large_file.bin bs=1024 count=$((10 * 1024))"
-
-        # As the default FILE_MAX_SIZE is 5MB, this should give an error
-        return self.open_file("test_files/large_file.bin")
-
     @classmethod
     def tearDownClass(cls):
-        printv("Closing files")
-        for file in cls.open_files:
-            file.close()
-
         if VERBOSE:
             print("Printing contents of test directory before cleaning up")
             print("***")
@@ -162,5 +127,5 @@ class FileUploadTest(unittest.TestCase):
         with self.assertRaisesRegex(Exception, "Failed to calculate MD5 hash for file!"):
             get_md5_hash(path_2)
 
-# if __name__ == "__main__":
-unittest.main()
+if __name__ == "__main__":
+    unittest.main()

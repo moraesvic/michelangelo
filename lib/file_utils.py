@@ -164,8 +164,10 @@ def compare_size_apply_changes(
         print(f"File {verb} in {abs(diff)} bytes ({percentage:.2f}%)")
 
     if old_size <= new_size:
-        print("Operation was not effective. Reverting.")
+        if print_stats:
+            print("Operation was not effective. Reverting.")
         os.remove(new_path)
     else:
-        print("Operation was successful. Applying changes.")
+        if print_stats:
+            print("Operation was successful. Applying changes.")
         os.rename(new_path, old_path)

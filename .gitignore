@@ -21,4 +21,9 @@ __pycache__/*
 # .env
 
 # Large binary file used for testing
-api/test_files/large_file.bin
+tests/test_files/large_file.bin
+
+# Backup folder for test pictures
+tests/test_files/bkp/*.jpg
+tests/test_files/bkp/*.jpeg
+tests/test_files/bkp/*.png
