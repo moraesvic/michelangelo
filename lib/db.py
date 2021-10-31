@@ -73,6 +73,7 @@ class DB (metaclass = Singleton):
 
         try:
             self.conn = self.connect()
+            self.conn.autocommit = True
         except Exception as e:
             print(f"Connection to database could not be established!\n{str(e)}")
 

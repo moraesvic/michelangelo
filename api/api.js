@@ -15,32 +15,6 @@ module.exports = function(app){
 	const prefix = IsProductionMode ? "" : process.env.ROOT_PATH;
 
     /* PRODUCTS */
-	app.get(`${prefix}/list-products`, async function(req,res) {
-		const PRODUCTS_PER_PAGE = 8;
-		const offset = 	req.query.page ?
-						PRODUCTS_PER_PAGE * req.query.page :
-						0;
-
-		let result = await DB.query(
-			`SELECT * FROM products
-			OFFSET $1::bigint
-			LIMIT ${PRODUCTS_PER_PAGE}::bigint;`,
-			[offset]);
-		if (!result.rows)
-			res.send(Exceptions.InternalServerError.name);
-		else
-			res.send(result.rows);
-	});
-
-	app.get(`${prefix}/products/count`, async function(req,res) {
-		let result = await DB.query(
-			`SELECT COUNT(*) FROM products;`);
-		if (!result.rows)
-			res.send(Exceptions.InternalServerError.name);
-		else
-			res.send(result.rows[0].count);
-	});
-
 	app.get(`${prefix}/products`, async function(req,res) {
 		let result = await DB.query(
 			`
@@ -54,19 +28,6 @@ module.exports = function(app){
 			res.send(Exceptions.InternalServerError.name);
 		else
 			res.send(result.rows);
-	});
-
-	app.get(`${prefix}/products/:id`, async function(req,res) {
-		let result = await DB.query(
-			`SELECT * FROM products
-			WHERE prod_id = $1
-			LIMIT 1;`,
-			[req.params.id]
-			);
-		if (result.rows.length === 0)
-			res.send(Exceptions.InternalServerError.name);
-		else
-			res.send(result.rows[0]);
 	});
 	
 	app.post(`${prefix}/products`, async function(req,res){

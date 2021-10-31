@@ -104,7 +104,7 @@ def Products(
                 (
                     prod_name,
                     prod_descr,
-                    prod_img,
+                    pic_id,
                     prod_price,
                     prod_instock
                 )

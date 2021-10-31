@@ -45,7 +45,7 @@ function ProductForm(props) {
                 }
             );
             console.log(ret);
-            console.log(ret.json());
+            console.log(await ret.json());
         }
 
         let data = new FormData();

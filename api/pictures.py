@@ -1,4 +1,4 @@
-from flask import request as req
+from flask import request as req, jsonify
 import lib.file_upload as file_upload
 
 def Pictures(
@@ -27,9 +27,9 @@ def Pictures(
                     max_size = app.config["MAX_CONTENT_LENGTH"],
                     check_size_before_saving = True
                 )
-                return pic_path
+                return jsonify({"path": pic_path})
             except:
-                return "errrorrrrrrr"
+                return jsonify({"error": "error"})
         
         else:
-            return "you did not send anything :)"
+            return jsonify({"error": "you did not send anything :)"})
