@@ -1,11 +1,11 @@
 import React from 'react';
 
+import * as myPath from "../js/myPath";
 import "./Image.css";
 
 function ImageTag(id, alt)
     {
-        let prefix = process.env.PUBLIC_URL;
-        let src = `${prefix}/pictures/${id}`.replace(/\/\//g, "/");
+        let src = myPath.linkTo(`/pictures/${id}`);
         return id ?
         <img src={src}
         title={alt}

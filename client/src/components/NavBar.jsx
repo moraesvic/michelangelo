@@ -29,12 +29,13 @@ function NavBar(props) {
     
         <div className="nav-title">
             <a href={myPath.getRootPath()}>{props.title}</a>
-            <a href="/">naive root</a>
         </div>
         { props.dropdowns.map( dropdown => {
             return (
                 <div className="nav-item" key={`nav-item-${dropdownIndex++}`}>
-                    <a href={myPath.linkTo(dropdown.endpoint)}>{dropdown.title}</a>
+                    <a href={myPath.linkTo(dropdown.endpoint)}>
+                        {dropdown.title}
+                    </a>
                 </div>
             );
         })}

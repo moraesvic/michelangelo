@@ -2,6 +2,8 @@ import React from 'react';
 import './styles.css';
 import "./ProductForm.css";
 
+import * as myPath from "../js/myPath";
+
 function ProductForm(props) {
     
     /* TO DO: include fields such as accept, limiting what kind
@@ -52,7 +54,7 @@ function ProductForm(props) {
         for (let [key, value] of Object.entries(formDict))
             data.append(key, value);
 
-        const action = `${process.env.PUBLIC_URL}/${props.action}`.replace(/\/\//g, "/");
+        const action = myPath.linkTo(props.action);
         const method = props.method || "POST";
         const ret = await fetch(
             action, {
@@ -71,7 +73,7 @@ function ProductForm(props) {
             return;
         }
         alert(`Request succeeded!`);
-        const viewPage = `${process.env.PUBLIC_URL}/view`.replace(/\/\//g, "/");
+        const viewPage = myPath.linkTo("/view");
         window.location.pathname = viewPage;
     }
 

@@ -5,11 +5,13 @@ module.exports = function (app) {
   const regex = `^${prefix}/`;
 
   app.use(
-    [
-      `${prefix}/list-products`,
-      `${prefix}/products`,
-      `${prefix}/pictures`],
-    createProxyMiddleware({
+    createProxyMiddleware(
+      [
+        `${prefix}/list-products`,
+        `${prefix}/products`,
+        `${prefix}/pictures`
+      ],
+      {
       target: `http://localhost:${process.env.BACKEND_PORT}`,
       pathRewrite: {
         [regex]: "/"

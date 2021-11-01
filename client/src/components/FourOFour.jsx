@@ -18,7 +18,7 @@ function FourOFour()
             { 
                 
                 setTimeout( () => {
-                    window.location.pathname = myPath.getRootPath();
+                    window.location.pathname = myPath.linkTo("/");
                     }, TIMEOUT)
             }
         </script>
