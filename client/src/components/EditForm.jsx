@@ -4,7 +4,7 @@ import "./ProductForm.css";
 
 import * as myPath from "../js/myPath";
 
-function ProductForm(props) {
+function EditForm(props) {
     
     /* TO DO: include fields such as accept, limiting what kind
     of files are accepted */
@@ -19,58 +19,17 @@ function ProductForm(props) {
       const value = event.target.value;
       setFormDict(previous => ({...previous, [name] : value}) );
     }
-
-    const handleFile = (e) => {
-        const MAX_FILE_SIZE = 5 * 1024 * 1024 ; // 5 megabytes
-        const maxFileSizeMB = Math.round(MAX_FILE_SIZE / 1024 / 1024);
-        
-        if (e.target.files[0].size > MAX_FILE_SIZE) {
-            alert(`Your file is too large! We accept up to ${maxFileSizeMB} megabytes.`);
-            setSelectedFile(undefined);
-            return;
-        }
-        setSelectedFile(e.target.files[0]);
-        setFileSelected(true);
-        console.log(selectedFile);
-    }
     
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        let picName = null;
-        let md5 = null;
-
-        /* First let's send the file, if there's any */
-        if (selectedFile) {
-            let fileForm = new FormData();
-            fileForm.append(fieldName, selectedFile);
-            let ret = await fetch(
-                myPath.linkTo("/pictures"),
-                {
-                    method: "POST",
-                    body: fileForm
-                }
-            );
-            if (ret.status === 200) {
-                let parsed = await ret.json();
-                [picName, md5] = [parsed.picName, parsed.md5]
-            }
-            else {
-                alert(`Error uploading picture: ${await ret.text()}`);
-                window.location.reload();
-                return;
-            }
-        }
-
         let payload = {};
-        payload["picName"] = picName;
-        payload["md5"] = md5;
 
         for (let [key, value] of Object.entries(formDict))
             payload[key] = value;
 
-        const action = myPath.linkTo(props.action);
-        const method = props.method || "POST";
+        const action = myPath.linkTo(`/products/${props.id}`);
+        const method = props.method || "PATCH";
         const ret = await fetch(
             action, {
                 method: method,
@@ -93,10 +52,12 @@ function ProductForm(props) {
         }
         
     }
+    if (!props.show)
+        return null;
 
     return (
         <div className="product-form">
-        <h1>Enter a new product!</h1>
+        <h3>Edit product</h3>
         <form 
         onSubmit={handleSubmit}>
         <table className="center">
@@ -160,35 +121,6 @@ function ProductForm(props) {
             </td>
         </tr>
         <tr>
-            <td>
-                Product image<br/>
-                <span className="small">
-                    (up to 5 MiB)
-                </span>
-            </td>
-            <td>
-                <label htmlFor="file-upload" className="form-button" type="button">
-                    Choose file
-                </label>
-                <input type="file"
-                name={fieldName}
-                onChange={handleFile}
-                accept="image/*"
-                id="file-upload"
-                />
-                <div>
-                    {isFileSelected ? (
-                        <div>
-                            <p>{selectedFile.name}</p>
-                            <p>({(selectedFile.size / 1000).toFixed(2)} KB)</p>
-                        </div>
-                    ) : (
-                        null
-                    )}
-                </div>
-            </td>
-        </tr>
-        <tr>
             <td colSpan="2">
                 <button
                 type="submit"
@@ -204,4 +136,4 @@ function ProductForm(props) {
     );
 }
 
-export default ProductForm;
+export default EditForm;

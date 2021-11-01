@@ -1,6 +1,7 @@
 import React from 'react';
 
 import * as Fetch from '../js/fetch';
+import * as myPath from "../js/myPath";
 import "./Products.css";
 
 import Image from "./Image";
@@ -57,7 +58,9 @@ function ProductList(props)
             key={keyIndex++}>
                 <div className="center">
                     <div className="pic-box">
-                        <Image id={prod.pic_id} alt={prod.prod_descr} />
+                        <a href={myPath.linkTo(`/view/${prod.prod_id}`)}>
+                            <Image id={prod.pic_id} alt={prod.prod_descr} />
+                        </a>
                     </div>
                     <p className="card-title">
                         {prod.prod_name} | $ {price}
