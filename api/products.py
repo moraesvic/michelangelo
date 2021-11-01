@@ -1,6 +1,88 @@
 from flask import jsonify, request as req, Response
-import math
+import math, os, re
 from werkzeug.utils import secure_filename
+
+import lib.exceptions as exceptions
+import api.pictures as pictures
+
+# Using compiled version of regex for readability and (insignificant)
+# performance boost
+REGEX_MD5 = re.compile(r"^[0-9a-f]{32}$")
+
+def extract_data(form_data, upload_folder):
+    pic_path = None
+    try:
+        prod_name = form_data["prodName"]
+        if len(prod_name) == 0:
+            raise ValueError("Name must be non-empty string")
+
+        prod_price = math.floor(float(form_data["prodPrice"]) * 100)
+        prod_instock = int(form_data["prodInStock"])
+
+        # Not mandatory fields
+        prod_descr = form_data.get("prodDescr", None)
+        pic_name = form_data.get("picName", None)
+        pic_md5 = form_data.get("md5", None)
+
+        # However, if it is given, it must be valid
+        # Sanitize to avoid an attack with something like picName = "../../../home"
+        if pic_name:
+            pic_basename = os.path.basename(pic_name)
+            pic_path = os.path.join(
+                    upload_folder,
+                    pic_basename
+            )
+            if not os.path.isfile(pic_path):
+                raise exceptions.BadRequest("File does not exist.")
+
+        if (pic_name and not pic_md5) or (not pic_name and pic_md5):
+            # If one of them is present, the other must be as well
+            raise exceptions.BadRequest("File name for picture and MD5 hash must be provided together.")
+
+       
+        if pic_md5 and not REGEX_MD5.search(pic_md5):
+            raise exceptions.BadRequest("Field 'MD5 hash' has invalid value.")
+
+        return prod_name, prod_descr, prod_price, prod_instock, pic_path, pic_md5
+
+    except (KeyError, ValueError, exceptions.BadRequest) as orig_exc:
+        # A required field is not present, cannot be cast into required
+        # type, or supplied file name is invalid
+        try:
+            os.remove(pic_path)
+
+        except (FileNotFoundError, TypeError):
+            # picName is None or does not correspond to a file in disk
+            # This "except" doesn't do anything, I just thought I should
+            # consider this situation
+            pass
+
+        # We raise another exception here, to be caught by main function
+        exceptions.printerr(orig_exc)
+        raise exceptions.BadRequest from orig_exc
+
+def delete_product(db, id):
+    # This is a function called by delete_product_single and selete_product_all
+    try:
+        result = db.query("""
+            DELETE
+            FROM products
+            WHERE prod_id = %s::bigint
+            RETURNING pic_id ; """,
+            args = (id,) )
+
+        if not result.row_count:
+            raise exceptions.BadRequest("Product did not exist")
+
+        pic_id = result.json()[0]["pic_id"]
+
+    except Exception as err:
+        raise exceptions.InternalServerError
+
+    if pic_id:
+        pictures.decrease_picture_count(pic_id)
+
+    return pic_id
 
 def Products(
         app,
@@ -24,7 +106,7 @@ def Products(
         except TypeError:
             offset = 0
         except ValueError:
-            return Response("Bad request", status = 400)
+            return exceptions.BadRequest.response()
 
         try:
             result = db.query("""
@@ -33,8 +115,9 @@ def Products(
                 LIMIT %s ;""",
                 (offset, PRODUCTS_PER_PAGE))
             return jsonify(result.json())
-        except:
-            return Response("Internal server error", status = 500)
+        except Exception as err:
+            exceptions.printerr(err)
+            return exceptions.InternalServerError.response()
         
 
     @app.get("/products/count")
@@ -43,7 +126,7 @@ def Products(
             result = db.query("SELECT COUNT(*) FROM products;")
             return jsonify(result.json()[0]["count"])
         except:
-            return Response("Internal server error", status = 500)
+            return exceptions.InternalServerError.response()
 
     @app.get("/products/<int:id>")
     def get_product_by_id(id):
@@ -55,48 +138,51 @@ def Products(
             if len(result.rows):
                 return jsonify(result.json()[0])
             else:
-                return Response("Not found", status = 404)
+                return exceptions.NotFound.response()
         except:
-            return Response("Internal server error", status = 500)
+            return exceptions.InternalServerError.response()
 
     @app.post("/products")
     def post_product():
-        # It is a bit tricky to handle files and multipart encoding
-        # If in doubt, check documentation:
-        # https://flask.palletsprojects.com/en/2.0.x/patterns/fileuploads/
-        
-        pic_id = None
-        pic_file = req.files.get("picture")
-        if pic_file and len(pic_file.filename):
-            print(pic_file)
-            print(type(pic_file))
-            upload_folder = app.config["UPLOAD_FOLDER"]
-            filename = secure_filename(pic_file.filename)
-            # pic_file.save(os.path.join(upload_folder, filename))
-            # ... process picture and attribute pic_id ...
-
         # Picture was already saved in database and in filesystem
         # If anything goes wrong below, we will need to remove it
 
-        form_data = dict(req.form)
+        form_data = req.get_json()
+        print(form_data)
+
         # We will do some casts and assert values are within what we expect,
         # but the DB also enforces these constraints. So it is just an extra
         # layer of security
-        try:
-            prod_name = form_data["prodName"]
-            if len(prod_name) == 0:
-                raise ValueError("Name must be non-empty string")
-            prod_descr = form_data["prodDescr"]
-            prod_price = math.floor(float(form_data["prodPrice"]) * 100)
-            prod_instock = int(form_data["prodInStock"])
 
-        except (KeyError, ValueError):
-            # ... remove picture ... #
-            return Response("Bad request", status = 400)
+        try:
+            prod_name, prod_descr, prod_price, prod_instock, pic_path, pic_md5 = \
+                    extract_data(form_data, app.config["UPLOAD_FOLDER"])
+        except exceptions.BadRequest as err:
+            exceptions.printerr(err)
+            return err.response()
+
+        # Save picture to database (thus far, it was only in disk)
+        pic_id = None
+        if pic_path:
+            try:
+                result = db.query("""
+                    SELECT pic_id
+                    FROM fn_pic_upsert
+                    (
+                        %s::text,
+                        %s::text
+                    ) ;
+                """, (pic_path, pic_md5) )
+                pic_id = result.json()[0]["pic_id"]
+            except Exception as err:
+                os.remove(pic_path)
+                exceptions.printerr(err)
+                return exceptions.InternalServerError.response()
 
         # We already asserted above that values were plausible. If we have an
         # exception now, it is now user's fault, it is an unforeseen error in
         # the server side
+
         try:
             db.query("""
                 INSERT INTO products
@@ -115,44 +201,49 @@ def Products(
                     %s::bigint,
                     %s::bigint
                 ) RETURNING * ; """,
-                ( prod_name, prod_descr, pic_id, prod_price, prod_instock )
+                args = ( prod_name, prod_descr, pic_id, prod_price, prod_instock )
             )
 
             return jsonify({"success": True, "picId": pic_id})
         
-        except Exception as e:
-            # ... remove picture ... #
-            print(f"An unexpected error happened when inserting product in database: {str(e)}")
-            return Response("Internal server error", status = 500)           
+        except Exception as err:
+            exceptions.printerr(err)
+            if pic_path:
+                print("We will also need to remove file")
+                try:
+                    pictures.decrease_picture_count(db, pic_id)
+                except:
+                    return exceptions.InternalServerError.response()
+            
+            return exceptions.InternalServerError.response()         
 
     @app.delete("/products/all")
     def delete_products_all():
         try:
             result = db.query("""
-                SELECT prod_id, prod_img
+                SELECT prod_id
                 FROM products; """).json()
 
-            pics_set = set()
+            deleted_pics = 0
             for row in result:
-                pic_id = row["prod_img"]
-                if pic_id:
-                    pics_set.add(pic_id)
+                prod_id = row["prod_id"]
+                deleted_pics += bool(delete_product(db, prod_id))
 
-            for pic in pics_set:
-                # delete picture
-                pass
+            return jsonify({ "deletedPics" : deleted_pics })
 
-            result_del_pics = db.query("""
-                DELETE FROM pics
-                RETURNING pic_id ; """)
+        except Exception as err:
+            exceptions.printerr(err)
+            return exceptions.InternalServerError.response()
 
-            deleted_pics = len(pics_set) + len(result_del_pics.rows)
-            deleted_prods = len(result)
-
-            return f"Success. We deleted {deleted_pics} pics and {deleted_prods} products"
-
-        except:
-            return Response("Internal server error", status = 500)
-
+    @app.delete("/products/<int:id>")
+    def delete_product_single(id):
+        try:
+            pic_id = delete_product(db, id)
+            return jsonify({ "picId" : pic_id })
+        except exceptions.BadRequest as err:
+            return err.response()
+        except exceptions.InternalServerError as err:
+            exceptions.printerr(err)
+            return err.response()
         
 

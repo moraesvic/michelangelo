@@ -10,71 +10,86 @@ function ProductForm(props) {
     of files are accepted */
 
     const fieldName = props.fieldName || "file";
-    let file = null;
-
-    let formDict = {};
+    const [selectedFile, setSelectedFile] = React.useState();
+    const [isFileSelected, setFileSelected] = React.useState(false);
+    const [formDict, setFormDict] = React.useState({});
 
     const handleChange = (event) => {
       const name = event.target.name;
       const value = event.target.value;
-      formDict[name] = value;
+      setFormDict(previous => ({...previous, [name] : value}) );
     }
 
     const handleFile = (e) => {
         const MAX_FILE_SIZE = 5 * 1024 * 1024 ; // 5 megabytes
         const maxFileSizeMB = Math.round(MAX_FILE_SIZE / 1024 / 1024);
-        file = e.target.files[0];
-        if (file.size > MAX_FILE_SIZE) {
+        
+        if (e.target.files[0].size > MAX_FILE_SIZE) {
             alert(`Your file is too large! We accept up to ${maxFileSizeMB} megabytes.`);
-            file = null;
+            setSelectedFile(undefined);
             return;
         }
-        alert("file successfully loaded")
+        setSelectedFile(e.target.files[0]);
+        setFileSelected(true);
+        console.log(selectedFile);
     }
     
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        let picName = null;
+        let md5 = null;
+
         /* First let's send the file, if there's any */
-        if (file) {
+        if (selectedFile) {
             let fileForm = new FormData();
-            fileForm.append(fieldName, file);
-            console.log(fileForm);
+            fileForm.append(fieldName, selectedFile);
             let ret = await fetch(
-                "pictures", {
+                myPath.linkTo("/pictures"),
+                {
                     method: "POST",
-                    data: fileForm
+                    body: fileForm
                 }
             );
-            console.log(ret);
-            console.log(await ret.json());
+            if (ret.status === 200) {
+                let parsed = await ret.json();
+                [picName, md5] = [parsed.picName, parsed.md5]
+            }
+            else {
+                alert(`Error uploading picture: ${await ret.text()}`);
+                window.location.reload();
+                return;
+            }
         }
 
-        let data = new FormData();
+        let payload = {};
+        payload["picName"] = picName;
+        payload["md5"] = md5;
+
         for (let [key, value] of Object.entries(formDict))
-            data.append(key, value);
+            payload[key] = value;
 
         const action = myPath.linkTo(props.action);
         const method = props.method || "POST";
         const ret = await fetch(
             action, {
                 method: method,
-                body: data,
-        });
-        if (!ret) {
-            alert("Internal server error. We apologize for the inconvenience.");
+                body: JSON.stringify(payload),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+        if (ret.status === 200) {
+            alert(`Request succeeded!`);
+            const viewPage = myPath.linkTo("/view");
+            window.location.pathname = viewPage;
+        }
+        else {
+            alert(`Error submitting product: ${await ret.text()}`);
             window.location.reload();
             return;
         }
-        const parsed = await ret.json();
-        if (!parsed.success) {
-            alert("Error processing request. Please assure you have sent an image within the maximum size.");
-            window.location.reload();          
-            return;
-        }
-        alert(`Request succeeded!`);
-        const viewPage = myPath.linkTo("/view");
-        window.location.pathname = viewPage;
+        
     }
 
     return (
@@ -93,6 +108,7 @@ function ProductForm(props) {
                 name="prodName"
                 id="prodName"
                 onChange={handleChange}
+                value={formDict["prodName"]}
                 required
                 />
             </td>
@@ -105,7 +121,9 @@ function ProductForm(props) {
                 <textarea
                 name="prodDescr"
                 id="prodDescr"
-                onChange={handleChange} />
+                onChange={handleChange}
+                value={formDict["prodDescr"]}
+                 />
             </td>
         </tr>
         <tr>
@@ -119,6 +137,8 @@ function ProductForm(props) {
                 min="0.01"
                 step="0.01"
                 onChange={handleChange}
+                value={formDict["prodPrice"]
+                }
                 />
             </td>
         </tr>
@@ -133,6 +153,7 @@ function ProductForm(props) {
                 min="0"
                 step="1"
                 onChange={handleChange}
+                value={formDict["prodInStock"]}
                 />
             </td>
         </tr>
@@ -153,6 +174,16 @@ function ProductForm(props) {
                 accept="image/*"
                 id="file-upload"
                 />
+                <div>
+                    {isFileSelected ? (
+                        <div>
+                            <p>{selectedFile.name}</p>
+                            <p>({(selectedFile.size / 1000).toFixed(2)} KB)</p>
+                        </div>
+                    ) : (
+                        null
+                    )}
+                </div>
             </td>
         </tr>
         <tr>

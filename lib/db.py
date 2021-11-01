@@ -2,7 +2,8 @@ import psycopg2, os
 from dotenv import load_dotenv
 import datetime as dt
 
-from .singleton import Singleton
+from lib.singleton import Singleton
+import lib.exceptions as exceptions
 
 class QueryResult:
     """Basically a struct for fitting the relevant parts of the result"""
@@ -34,6 +35,7 @@ class QueryResult:
         self.labeled_rows = None
 
     def json(self):
+        # This is not even JSON, it is a dictionary, but the name stuck
         if self.labeled_rows:
             return self.labeled_rows
         
@@ -89,7 +91,17 @@ class DB (metaclass = Singleton):
     def connect(self):
         return psycopg2.connect(**self.get_sql_env())
 
-    def query(self, fmtstr: str, args: tuple = tuple() ):
+    def query(
+                self,
+                fmtstr: str,
+                args: tuple = tuple(),
+                verbose: bool = False ):
+        # In case user accidentally uses sole argument without making it into
+        # a tuple, we can help them and prevent an error
+        if type(args) != tuple:
+            print("Warning: argument should be given as tuple")
+            args = (args,)
+        
         # Strip formated string of whitespace
         stripped = fmtstr.strip()
         if stripped[-1] != ";":
@@ -103,7 +115,7 @@ class DB (metaclass = Singleton):
             cur = self.conn.cursor()
         except:
             print("Could not get a cursor!")
-            return None
+            raise exceptions.InternalServerError("Could not get cursor.")
 
         try:
             cur.execute(stripped, args)
@@ -116,9 +128,30 @@ class DB (metaclass = Singleton):
             cur.close()
             return query_result
             
-        except Exception as e:
+        except psycopg2.IntegrityError as err:
+            # If this error is raised, a constraint was violated
+            # (e.g. trying to insert string for integer field, foreign key
+            # is invalid, non-nullable field was left empty, etc.)
+
+            # It could be bad user input, but application logic should have
+            # filtered this. Better to examine with care.
+            
+            if verbose:
+                cmd = cur.mogrify(stripped, args).decode("utf-8")
+                print(f"Integrity error! SQL command <{cmd}> raised an error")
+                print(err)
+                print("Are you trying to insert non-sanitized or non-validated data?")
+            cur.close()
+            raise exceptions.BadRequest("Integrity error occurred interacting with database")
+
+        except psycopg2.Error as err:
+            # Another kind of error occurred. Could be anything, from a disconnect
+            # to a programming mistake. This is considered more serious than the
+            # above.
+            print(err)
             cmd = cur.mogrify(stripped, args).decode("utf-8")
             cur.close()
-            print(f"Error! SQL command <{cmd}> raised an error: {str(e)}")
-            return None
+            print(f"Error! SQL command <{cmd}> raised an error")
+            exceptions.printerr(err)
+            raise exceptions.InternalServerError("An unknown error happened.")
         
