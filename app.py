@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 
-import os
-from flask import Flask, jsonify, request, send_file
+import os, re
+from flask import Flask, send_file
+from dotenv import load_dotenv
 from waitress import serve
 
 from lib.singleton import Singleton
 import lib.db as db
+
+def path_rewrite(s):
+	return re.sub(r"/{2,}", "/", s)
 
 class App (metaclass = Singleton):
 	STATIC_URL_PATH = "/static"
@@ -13,6 +17,7 @@ class App (metaclass = Singleton):
 	UPLOAD_FOLDER = "uploads"
 	REACT_MAIN_PAGE = "client/build/index.html"
 	REACT_FAVICON = "client/build/favicon.ico"
+	REACT_MANIFEST = "client/build/manifest.json"
 	DEFAULT_PORT = 5000
 
 	# We will allow a maximum payload size of 5 MB
@@ -49,6 +54,10 @@ class App (metaclass = Singleton):
 		self.app.config["MAX_CONTENT_LENGTH"] = self.MAX_CONTENT_LENGTH
 
 		self.configure_static(nginx_static)
+		print(f"app_name is \"{self.app_name}\"")
+		print(f"static_url_path is {self.app.static_url_path}")
+		print(f"static_folder is {self.app.static_folder}")
+		print(f"API routes will be prefixed with \"{self.prefix}\"")
 
 		# It is necessary to connect to DB before configuring routes, because
 		# each route will receive DB as argument
@@ -56,6 +65,7 @@ class App (metaclass = Singleton):
 
 		self.configure_routes()
 		self.configure_favicon()
+		self.configure_manifest()
 		self.configure_fallback()
 
 		self.listen()
@@ -69,7 +79,7 @@ class App (metaclass = Singleton):
 			self.app.static_url_path = None
 			self.app.static_folder = None
 		else:
-			self.app.static_url_path = self.STATIC_URL_PATH
+			self.app.static_url_path = path_rewrite(f"/{self.app_name}{self.STATIC_URL_PATH}")
 			self.app.static_folder = self.STATIC_FOLDER
 
 	def configure_routes(self):
@@ -86,12 +96,6 @@ class App (metaclass = Singleton):
 		for route in routes:
 			route(self.app, self.db, self.prefix)
 
-
-		@self.app.route("/stores/<string:name>", methods=["GET"])
-		def get_store(name):
-			print(name)
-			return jsonify({"data": 42})
-
 	def configure_fallback(self):
 		# This is the fallback route. If the path does not match any of the API
 		# routes, then it is seeking something from the front-end. And then,
@@ -100,7 +104,8 @@ class App (metaclass = Singleton):
 		@self.app.get("/", defaults = {"path": ""})
 		@self.app.get("/<path:path>")
 		def front_end(path):
-			# print(f"You tried to reach {path}, redirecting to React main page")
+			rewritten_path = re.sub(rf"{self.prefix}", "", path)
+			print(f"You tried to reach {rewritten_path}, redirecting to React main page")
 			return send_file(self.REACT_MAIN_PAGE)
 
 	def configure_favicon(self):
@@ -111,6 +116,15 @@ class App (metaclass = Singleton):
 		@self.app.get("/favicon.ico")
 		def serve_favicon():
 			return send_file(self.REACT_FAVICON)
+
+	def configure_manifest(self):
+		# This is an exception which must be handled especially. File
+		# "favicon.ico", even though it is static, is normally present in the
+		# root of a domain
+
+		@self.app.get("/manifest.json")
+		def serve_manifest():
+			return send_file(self.REACT_MANIFEST)
 
 	def listen(self):
 		# app.run() is only called in development and only when command is
@@ -139,6 +153,7 @@ class App (metaclass = Singleton):
 # ./run_dev.sh and ./run_prod.sh . In any case, it is safer to cover
 # all possible scenarios here
 
+load_dotenv()
 flask_env = os.environ.get("FLASK_ENV", None)
 port = os.environ.get("PORT", None)
 app_name = os.environ.get("APP_NAME", None)

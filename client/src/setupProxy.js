@@ -9,7 +9,7 @@ module.exports = function (app) {
       `${prefix}/products`,
       `${prefix}/pictures`],
     createProxyMiddleware({
-      target: `http://localhost:${process.env.BACKEND_PORT}`,
+      target: `http://localhost:${process.env.BACKEND_PORT}`
     })
   );
   

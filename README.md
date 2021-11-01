@@ -22,7 +22,7 @@ Unit tests can be run with the script `scripts/run_tests`. This will launch the 
 
 ### Running
 
-You should be able to run development or production mode at the same URL (http://localhost/michelangelo). Make sure you add this to your server block in nginx:
+Development and production mode are accessible in the same path, but at different ports (http://localhost/michelangelo). Development mode must be run in port 7777, whereas production mode should be run in port 80, behind a reverse proxy. Make sure you add this to your server block in nginx:
 
 ```
 location = /michelangelo {
@@ -30,14 +30,15 @@ location = /michelangelo {
     }
 
 location /michelangelo/ {
+    rewrite /michelangelo/(.*) /$1 break;
+    proxy_pass         http://localhost:7777/michelangelo/;
     proxy_set_header   X-Forwarded-For $remote_addr;
     proxy_set_header   Host $http_host;
-
-    # Port 5000 was already taken by another service, so I picked a
-    # random number within the expected range
-    proxy_pass         http://localhost:7777/michelangelo/;
+    
 }
 ```
+
+It would be convenient to have development mode at the same port as production, but reverse-proxying makes things difficult, especially when debugging with websocket. I was getting the error `webpackHotDevClient.js:60 WebSocket connection to 'ws://localhost/sockjs-node' failed`. Solutions tried, without success: [1](https://stackoverflow.com/questions/60328836/how-to-proxy-a-websocket-connection), [2](https://stackoverflow.com/questions/59794148/webpack-with-proxy-the-development-server-has-disconnected), [3](https://stackoverflow.com/questions/58088218/websockets-in-create-react-app-with-webpack-proxy). This was a reported issue in 2020 still, and might be an area of active development for React.
 
 The scripts `scripts/run_dev` and `scripts/run_prod` set up the environment variables and start the server(s). Hosting this app in other paths is possible, just change the value for APP_NAME in the ".env" file for the back-end, and the value of PUBLIC_URL in the ".env" file in the front-end. The port numbers are also completely arbitrary, and anything should work as long as you are consistent across files. Later I might also add a script that solves all this at once.
 
