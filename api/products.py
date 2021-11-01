@@ -4,10 +4,9 @@ from werkzeug.utils import secure_filename
 
 def Products(
         app,
-        db,
-        prefix):
+        db):
 
-    @app.get(f"{prefix}/list-products")
+    @app.get("/list-products")
     def get_list_products():
         # This number is defined here and in the front-end
         # Perhaps in the future I will create some environment variable
@@ -38,7 +37,7 @@ def Products(
             return Response("Internal server error", status = 500)
         
 
-    @app.get(f"{prefix}/products/count")
+    @app.get("/products/count")
     def get_products_count():
         try:
             result = db.query("SELECT COUNT(*) FROM products;")
@@ -46,7 +45,7 @@ def Products(
         except:
             return Response("Internal server error", status = 500)
 
-    @app.get(f"{prefix}/products/<int:id>")
+    @app.get("/products/<int:id>")
     def get_product_by_id(id):
         try:
             result = db.query("""
@@ -60,7 +59,7 @@ def Products(
         except:
             return Response("Internal server error", status = 500)
 
-    @app.post(f"{prefix}/products")
+    @app.post("/products")
     def post_product():
         # It is a bit tricky to handle files and multipart encoding
         # If in doubt, check documentation:
@@ -126,7 +125,7 @@ def Products(
             print(f"An unexpected error happened when inserting product in database: {str(e)}")
             return Response("Internal server error", status = 500)           
 
-    @app.delete(f"{prefix}/products/all")
+    @app.delete("/products/all")
     def delete_products_all():
         try:
             result = db.query("""

@@ -31,7 +31,9 @@ function ProductList(props)
 
     React.useEffect(() => {
         const wrapper = async () => {
-            const response = await Fetch.get(`/list-products?page=${props.page}`);
+            const response = await Fetch.get(
+                `/list-products?page=${props.page}`
+            );
             setProducts(response);
         }
         wrapper();

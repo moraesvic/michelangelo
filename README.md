@@ -50,10 +50,29 @@ I haven't found this information officially, but it seems that `homepage` and `P
 
 Things I have not tried yet include using [base href tag](https://skryvets.com/blog/2018/09/20/an-elegant-solution-of-deploying-react-app-into-a-subdirectory/) and using [react-router](https://www.npmjs.com/package/react-router). I am also not sure what the current best practice for proxying is. The more recent tutorials tend to only use `proxy` key in the `package.json`, whereas older ones use `http-proxy-middleware`.
 
-A work around this was checking if we are running in development mode and appending a prefix to every route. Something like:
+With a path rewrite for the proxy, we can make URLs be consistent across development and production:
 
 ```
-@app.get(f"{prefix}/list-products")
+/* setupProxy.js */
+const { createProxyMiddleware } = require("http-proxy-middleware");
+module.exports = function (app) {
+
+  const prefix = process.env.PUBLIC_URL;
+  const regex = `^${prefix}/`;
+
+  app.use(
+    [
+      `${prefix}/list-products`,
+      `${prefix}/products`,
+      `${prefix}/pictures`],
+    createProxyMiddleware({
+      target: `http://localhost:${process.env.BACKEND_PORT}`,
+      pathRewrite: {
+        [regex]: "/"
+      }
+    })
+  );
+};
 ```
 
-This is not elegant and not practical, and there is run for improving it in the future.
+A weird, undocumented behavior is: a link to a resource will use *hostname* as the root path. Example: `<a href="/">Main Page</a>` will take you to `http://localhost/` . On the other hand, a **fetch request** to a resource will use *homepage* (PUBLIC_URL variable) as the root path, i.e., `fetch("/mydata")` will take you to `http://localhost/homepage/mydata`.

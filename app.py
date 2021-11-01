@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 
-import os, re
+import os
 from flask import Flask, send_file
 from dotenv import load_dotenv
 from waitress import serve
 
 from lib.singleton import Singleton
 import lib.db as db
-
-def path_rewrite(s):
-	return re.sub(r"/{2,}", "/", s)
 
 class App (metaclass = Singleton):
 	STATIC_URL_PATH = "/static"
@@ -47,7 +44,6 @@ class App (metaclass = Singleton):
 		self.running_as_main = running_as_main
 		self.port = port or self.DEFAULT_PORT
 		self.app_name = app_name
-		self.prefix = f"/{self.app_name}" if self.production_mode == False else ""
 
 		self.app = Flask(__name__)
 		self.app.config["UPLOAD_FOLDER"] = self.UPLOAD_FOLDER
@@ -57,7 +53,6 @@ class App (metaclass = Singleton):
 		print(f"app_name is \"{self.app_name}\"")
 		print(f"static_url_path is {self.app.static_url_path}")
 		print(f"static_folder is {self.app.static_folder}")
-		print(f"API routes will be prefixed with \"{self.prefix}\"")
 
 		# It is necessary to connect to DB before configuring routes, because
 		# each route will receive DB as argument
@@ -79,7 +74,7 @@ class App (metaclass = Singleton):
 			self.app.static_url_path = None
 			self.app.static_folder = None
 		else:
-			self.app.static_url_path = path_rewrite(f"/{self.app_name}{self.STATIC_URL_PATH}")
+			self.app.static_url_path = self.STATIC_URL_PATH
 			self.app.static_folder = self.STATIC_FOLDER
 
 	def configure_routes(self):
@@ -94,7 +89,7 @@ class App (metaclass = Singleton):
 		]
 		
 		for route in routes:
-			route(self.app, self.db, self.prefix)
+			route(self.app, self.db)
 
 	def configure_fallback(self):
 		# This is the fallback route. If the path does not match any of the API
@@ -104,8 +99,7 @@ class App (metaclass = Singleton):
 		@self.app.get("/", defaults = {"path": ""})
 		@self.app.get("/<path:path>")
 		def front_end(path):
-			rewritten_path = re.sub(rf"{self.prefix}", "", path)
-			print(f"You tried to reach {rewritten_path}, redirecting to React main page")
+			print(f"You tried to reach {path}, redirecting to React main page")
 			return send_file(self.REACT_MAIN_PAGE)
 
 	def configure_favicon(self):

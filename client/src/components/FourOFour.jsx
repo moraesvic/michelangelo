@@ -1,9 +1,10 @@
 import React from 'react';
+import * as myPath from '../js/myPath';
 
 function FourOFour()
 {
     const TIMEOUT = 3000; // given in milliseconds
-    const rootNoDoubleSlash = `/${process.env.PUBLIC_URL}`.replace(/\/\//g, "/");
+    
     return (
     <div className="center">
         <h1>
@@ -17,7 +18,7 @@ function FourOFour()
             { 
                 
                 setTimeout( () => {
-                    window.location.pathname = rootNoDoubleSlash
+                    window.location.pathname = myPath.getRootPath();
                     }, TIMEOUT)
             }
         </script>
