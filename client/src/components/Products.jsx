@@ -45,7 +45,8 @@ function ProductList(props)
     return (
         <section className="flex-container">
         { products.map(prod => {
-            const description = prod.prod_descr.length === 0 ?
+            const description = 
+                (!prod.prod_descr || prod.prod_descr.length === 0) ?
                 "No description available." :
                 trim(prod.prod_descr);
             
@@ -56,7 +57,7 @@ function ProductList(props)
             key={keyIndex++}>
                 <div className="center">
                     <div className="pic-box">
-                        <Image id={prod.prod_img} alt={prod.prod_descr} />
+                        <Image id={prod.pic_id} alt={prod.prod_descr} />
                     </div>
                     <p className="card-title">
                         {prod.prod_name} | $ {price}

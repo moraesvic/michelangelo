@@ -50,6 +50,13 @@ class QueryResult:
 
         return self.labeled_rows
 
+    def single(self):
+        # If a single value was returned (single row and single column),
+        # this allows to access its value
+        if len(self.descr) == 1 and self.row_count == 1:
+            return self.rows[0][0]
+        raise exceptions.AssertionFailed("Can only use .single() method if result size is 1 x 1")
+
     def __str__(self):
         return ( "\n"
             + "-----\n"

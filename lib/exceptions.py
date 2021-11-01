@@ -35,3 +35,7 @@ class NotFound(CustomException):
 class InternalServerError(CustomException):
     name = "Internal server error"
     code = 500
+
+class AssertionFailed(InternalServerError):
+    """Use this if an assertion fails due to bad coding
+    (code that should not have been reached was executed, etc)"""

@@ -22,7 +22,7 @@
 @media (max-width: 800px)
 {
     .card {
-        width: 280px;
+        width: 260px;
         margin: 4px;
     }
 }
@@ -30,7 +30,7 @@
 @media (max-width: 640px)
 {
     .card {
-        width: 220px;
+        width: 200px;
         margin: 2px;
     }
 }

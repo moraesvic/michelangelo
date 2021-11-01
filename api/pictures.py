@@ -1,4 +1,4 @@
-from flask import request as req, jsonify
+from flask import request as req, jsonify, send_file
 import os
 
 import lib.file_upload as file_upload
@@ -7,11 +7,17 @@ import lib.exceptions as exceptions
 # This belongs here (logically) but gets called by products.py
 def decrease_picture_count(db, pic_id):
     try:
-        result = db.query("""
+        # This will path to the picture if and only if calling the function
+        # resulted in reference count dropping to zero
+
+        pic_path = db.query("""
             SELECT *
             FROM fn_pic_decrease_ref_count(%s::int) ;
-        """, args = (pic_id) )
-        print(result)
+        """, args = (pic_id,) ).single()
+        
+        if pic_path:
+            os.remove(pic_path)
+
     except Exception as err:
         exceptions.printerr(err)
         raise
@@ -22,7 +28,14 @@ def Pictures(
     
     @app.get("/pictures/<int:id>")
     def get_picture_by_id(id):
-        pass
+        path = db.query("""
+            SELECT pic_path
+            FROM pics
+            WHERE pic_id = %s::bigint 
+            LIMIT 1;
+        """, args = (id,) ).single()
+
+        return send_file(path)
 
     @app.delete("/pictures/all")
     def delete_pictures_all():

@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS pics (
     pic_id BIGSERIAL NOT NULL PRIMARY KEY,
 	pic_md5 TEXT NOT NULL UNIQUE,
-	pic_path TEXT NOT NULL,
+	pic_path TEXT NOT NULL UNIQUE,
     pic_created TIMESTAMP NOT NULL DEFAULT NOW(),
     pic_ref_count INT DEFAULT 1,
 
@@ -13,13 +13,30 @@ CREATE TABLE IF NOT EXISTS pics (
 
 CREATE OR REPLACE FUNCTION fn_pic_decrease_ref_count
 (my_pic_id BIGINT)
-RETURNS BIGINT
+RETURNS TEXT
 AS
 $$
 -- if the picture was non-existent before running this function, or the
 -- execution of this command caused its deletion, will return True,
 -- if picture still exists, will return False
+DECLARE
+    path_to_picture TEXT;
 BEGIN
+    WITH cte AS
+    (
+        SELECT pic_id, pic_path
+        FROM pics
+            WHERE pic_id = my_pic_id
+            AND pic_ref_count = 1
+    )
+    SELECT
+        CASE
+            WHEN NOT EXISTS(SELECT FROM cte) THEN ''
+            ELSE pic_path
+        END
+    FROM cte
+    INTO path_to_picture;
+
     IF EXISTS (
         SELECT FROM pics
         WHERE
@@ -36,14 +53,7 @@ BEGIN
             WHERE pic_id = my_pic_id;
     END IF ;
 
-    RETURN
-    (
-        SELECT
-        CASE
-            WHEN NOT EXISTS(SELECT FROM pics WHERE pic_id = my_pic_id) THEN 1
-            ELSE 0
-        END as deleted
-    );
+    RETURN path_to_picture;
 END
 $$
 LANGUAGE PLPGSQL;

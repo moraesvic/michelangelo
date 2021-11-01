@@ -74,13 +74,13 @@ def delete_product(db, id):
         if not result.row_count:
             raise exceptions.BadRequest("Product did not exist")
 
-        pic_id = result.json()[0]["pic_id"]
+        pic_id = result.single()
 
     except Exception as err:
         raise exceptions.InternalServerError
 
     if pic_id:
-        pictures.decrease_picture_count(pic_id)
+        pictures.decrease_picture_count(db, pic_id)
 
     return pic_id
 
@@ -165,15 +165,15 @@ def Products(
         pic_id = None
         if pic_path:
             try:
-                result = db.query("""
-                    SELECT pic_id
+                pic_id = db.query("""
+                    SELECT *
                     FROM fn_pic_upsert
                     (
                         %s::text,
                         %s::text
                     ) ;
-                """, (pic_path, pic_md5) )
-                pic_id = result.json()[0]["pic_id"]
+                """, (pic_path, pic_md5) ).single()
+                
             except Exception as err:
                 os.remove(pic_path)
                 exceptions.printerr(err)
@@ -184,7 +184,7 @@ def Products(
         # the server side
 
         try:
-            db.query("""
+            result = db.query("""
                 INSERT INTO products
                 (
                     prod_name,
@@ -204,12 +204,16 @@ def Products(
                 args = ( prod_name, prod_descr, pic_id, prod_price, prod_instock )
             )
 
-            return jsonify({"success": True, "picId": pic_id})
+            return jsonify({
+                "success": True,
+                "picId": pic_id,
+                "prodId": result.json()[0]["prod_id"]
+                })
         
         except Exception as err:
             exceptions.printerr(err)
             if pic_path:
-                print("We will also need to remove file")
+                print("We will also need to decrease file count")
                 try:
                     pictures.decrease_picture_count(db, pic_id)
                 except:
