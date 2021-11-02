@@ -4,13 +4,13 @@ import * as Fetch from '../js/fetch';
 import * as myPath from "../js/myPath";
 import "./Products.css";
 
-import Image from "./Image";
+import {Image} from "./Image";
 
 function trim(text)
 {
     /* According to experiments, that is the longest text that would fit into
-    the box. That is also a half-tweet */
-    const MAX_LENGTH = 140;
+    the box. */
+    const MAX_LENGTH = 115;
     let trimmed;
 
     if (text.length > MAX_LENGTH)

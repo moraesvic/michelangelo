@@ -9,9 +9,6 @@ function EditForm(props) {
     /* TO DO: include fields such as accept, limiting what kind
     of files are accepted */
 
-    const fieldName = props.fieldName || "file";
-    const [selectedFile, setSelectedFile] = React.useState();
-    const [isFileSelected, setFileSelected] = React.useState(false);
     const [formDict, setFormDict] = React.useState({});
 
     const handleChange = (event) => {
@@ -23,17 +20,14 @@ function EditForm(props) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        let payload = {};
-
-        for (let [key, value] of Object.entries(formDict))
-            payload[key] = value;
+        formDict["prodId"] = props.id;
 
         const action = myPath.linkTo(`/products/${props.id}`);
-        const method = props.method || "PATCH";
+        const method = "PATCH";
         const ret = await fetch(
             action, {
                 method: method,
-                body: JSON.stringify(payload),
+                body: JSON.stringify(formDict),
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -48,15 +42,14 @@ function EditForm(props) {
         else {
             alert(`Error submitting product: ${await ret.text()}`);
             window.location.reload();
-            return;
         }
         
     }
-    if (!props.show)
-        return null;
 
-    return (
+    return props.show ?
+    (
         <div className="product-form">
+        <hr />
         <h3>Edit product</h3>
         <form 
         onSubmit={handleSubmit}>
@@ -133,7 +126,9 @@ function EditForm(props) {
         </table>
         </form>
         </div>
-    );
+    )
+    :
+    null;
 }
 
 export default EditForm;

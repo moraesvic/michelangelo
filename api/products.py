@@ -9,7 +9,7 @@ import api.pictures as pictures
 # performance boost
 REGEX_MD5 = re.compile(r"^[0-9a-f]{32}$")
 
-def extract_data(form_data, upload_folder):
+def validate_post_data(form_data, upload_folder):
     pic_path = None
     try:
         prod_name = form_data["prodName"]
@@ -58,6 +58,27 @@ def extract_data(form_data, upload_folder):
             pass
 
         # We raise another exception here, to be caught by main function
+        exceptions.printerr(orig_exc)
+        raise exceptions.BadRequest from orig_exc
+
+def validate_patch_data(form_data):
+    # Without a picture, this should be much easier
+    try:
+        prod_id = form_data["prodId"]
+        prod_name = form_data["prodName"]
+        if len(prod_name) == 0:
+            raise ValueError("Name must be non-empty string")
+
+        prod_price = math.floor(float(form_data["prodPrice"]) * 100)
+        prod_instock = int(form_data["prodInStock"])
+
+        # Not mandatory fields
+        prod_descr = form_data.get("prodDescr", None)
+
+        return prod_id, prod_name, prod_descr, prod_price, prod_instock
+
+    except (KeyError, ValueError) as orig_exc:
+        # A required field is not present, cannot be cast into required type
         exceptions.printerr(orig_exc)
         raise exceptions.BadRequest from orig_exc
 
@@ -148,7 +169,6 @@ def Products(
         # If anything goes wrong below, we will need to remove it
 
         form_data = req.get_json()
-        print(form_data)
 
         # We will do some casts and assert values are within what we expect,
         # but the DB also enforces these constraints. So it is just an extra
@@ -156,7 +176,7 @@ def Products(
 
         try:
             prod_name, prod_descr, prod_price, prod_instock, pic_path, pic_md5 = \
-                    extract_data(form_data, app.config["UPLOAD_FOLDER"])
+                    validate_post_data(form_data, app.config["UPLOAD_FOLDER"])
         except exceptions.BadRequest as err:
             exceptions.printerr(err)
             return err.response()
@@ -250,4 +270,29 @@ def Products(
             exceptions.printerr(err)
             return err.response()
         
-
+    @app.patch("/products/<int:id>")
+    def patch_product(id):
+        print(req.get_json())
+        try:
+            prod_id, prod_name, prod_descr, prod_price, prod_instock = \
+                validate_patch_data(req.get_json())
+        except exceptions.BadRequest as err:
+            return err.response()
+        
+        try:
+            db.query("""
+                UPDATE products
+                SET
+                    prod_name = %s::text,
+                    prod_descr = %s::text,
+                    prod_price = %s::bigint,
+                    prod_instock = %s::bigint
+                WHERE
+                    prod_id = %s::bigint ;
+            """,
+            args = (prod_name, prod_descr, prod_price, prod_instock, prod_id) )
+            return ""
+        except Exception as err:
+            exceptions.printerr(err)
+            return exceptions.InternalServerError.response()
+        

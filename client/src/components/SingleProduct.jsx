@@ -4,26 +4,21 @@ import * as Fetch from '../js/fetch';
 import * as myPath from "../js/myPath";
 import "./SingleProduct.css";
 
-import Image from "./Image";
+import {ImageHref} from "./Image";
 import EditForm from "./EditForm";
-
-function NonExistent(props)
-{
-    return (
-        <p>The requested product ID does not exist.</p>
-    )
-}
+import DeleteProduct from "./DeleteProduct";
 
 function ProductContent(props)
 {
     const product = props.product;
 
-    return (
+    return props.show ?
+    (
         <div className="product-page">
             <h1>{product.prod_name}</h1>
-            <Image id={product.pic_id} alt={product.prod_descr} />
+            <ImageHref id={product.pic_id} alt={product.prod_descr || ""} />
             <div className="prod-descr">
-                <p>{product.prod_descr}</p>
+                <p>{product.prod_descr || ""}</p>
             </div>
             <p className="prod-price">
                 $ {(product.prod_price / 100).toFixed(2)}
@@ -33,10 +28,15 @@ function ProductContent(props)
             </p>     
         </div>
     )
+    :
+    <p>The requested product ID does not exist.</p>;
 }
 
-function PageInfo(props)
+function SingleProduct(props)
 {
+    const [showEdit, setShowEdit] = React.useState(false);
+    const [showDelete, setShowDelete] = React.useState(false);
+
     const [waiting, setWaiting] = React.useState(true);
     const [okStatus, setOkStatus] = React.useState(true);
     const [product, setProduct] = React.useState();
@@ -46,45 +46,72 @@ function PageInfo(props)
             try {
                 const response = await Fetch.get(`/products/${props.id}`);
                 setProduct(response);
-                setWaiting(false);
             } catch {
                 setOkStatus(false);
+            } finally {
                 setWaiting(false);
             }
         }
         wrapper();
-    }, [props.id]);
+    }, [props.id] );
 
-    if (waiting)
-        return null;
-
-    return okStatus ?
-        <ProductContent product={product} />
-        :
-        <NonExistent /> ;
-}
-
-function SingleProduct(props)
-{
-    const [showEdit, setShowEdit] = React.useState(false);
-
-    function clickEdit()
+    function EditButton(props)
     {
-        setShowEdit(!showEdit);
+        function clickEdit()
+        {
+            if (showDelete && !showEdit)
+                setShowDelete(false)
+            setShowEdit(!showEdit);
+        }
+        
+        return props.show ?
+        (
+            <button className="edit-button" onClick={clickEdit}>
+                Edit
+            </button>
+        )
+        :
+        null;
+    }
+
+    function DeleteButton(props)
+    {
+        function clickDelete()
+        {
+            if (!showDelete && showEdit)
+                setShowEdit(false);
+            setShowDelete(!showDelete);
+        }
+        return props.show ?
+        (
+            <button className="delete-button" onClick={clickDelete}>
+                Delete
+            </button>
+        )
+        :
+        null;
     }
 
     return (
         <div className="center">
-            <PageInfo id={props.id} />
+            <ProductContent
+            product={product}
+            show={!waiting && okStatus} />
             <a href={myPath.linkTo("/")}>
                 <button className="back-button" >
                     &lt; Back to main
                 </button>
             </a>
-            <button className="edit-button" onClick={clickEdit}>
-                Edit
-            </button>
-            <EditForm show={showEdit} id={props.id} />
+            <EditButton
+            show={!waiting && okStatus} />
+            <DeleteButton
+            show={!waiting && okStatus} />
+            <DeleteProduct
+            show={showDelete && !waiting && okStatus}
+            id={props.id} />
+            <EditForm
+            show={showEdit && !waiting && okStatus}
+            id={props.id} />
         </div>
     )
 }

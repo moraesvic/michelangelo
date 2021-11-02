@@ -28,14 +28,20 @@ def Pictures(
     
     @app.get("/pictures/<int:id>")
     def get_picture_by_id(id):
-        path = db.query("""
-            SELECT pic_path
-            FROM pics
-            WHERE pic_id = %s::bigint 
-            LIMIT 1;
-        """, args = (id,) ).single()
-
-        return send_file(path)
+        try:
+            result = db.query("""
+                SELECT pic_path
+                FROM pics
+                WHERE pic_id = %s::bigint 
+                LIMIT 1;
+            """, args = (id,) )
+            if result.row_count:
+                return send_file(result.single())
+            else:
+                return exceptions.NotFound.response()
+        except Exception as err:
+            exceptions.printerr(err)
+            return exceptions.InternalServerError.response()
 
     @app.delete("/pictures/all")
     def delete_pictures_all():

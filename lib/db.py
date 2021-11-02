@@ -130,7 +130,7 @@ class DB (metaclass = Singleton):
                 cur.statusmessage,
                 cur.description,
                 cur.rowcount,
-                cur.fetchall()
+                cur.fetchall() if cur.description else None
             )
             cur.close()
             return query_result

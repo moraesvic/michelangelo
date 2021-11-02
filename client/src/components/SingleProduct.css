@@ -2,7 +2,7 @@
     text-align: center;
 }
 
-.back-button, .edit-button {
+.back-button, .edit-button, .delete-button {
     color: white;
     font-weight: 900;
 
@@ -21,7 +21,11 @@
     background-color: rgb(32, 96, 99);
 }
 
-.back-button:hover, .edit-button:hover {
+.delete-button {
+    background-color: crimson;
+}
+
+.back-button:hover, .edit-button:hover, .delete-button:hover {
     cursor: pointer;
 }
 

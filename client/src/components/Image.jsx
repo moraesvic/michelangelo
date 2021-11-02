@@ -27,4 +27,17 @@ function Image(props)
     );
 }
 
-export default Image;
+function ImageHref(props)
+{
+    return props.id ?
+    <a href={myPath.linkTo(`/pictures/${props.id}`)}>
+        <Image id={props.id} alt={props.alt} />
+    </a>
+    :
+    <Image id={props.id} alt={props.alt} />;
+}
+
+export {
+    Image,
+    ImageHref
+};
