@@ -201,6 +201,27 @@ def main():
     version = sys.version_info
     if version.major != 3 or version.minor != 8:
         print("Script (and app) must be run with Python3.8")
+        print("If you do not have it yet, we recommend building for source:")
+        commands = """
+cd ~
+wget https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tgz
+tar -xf Python-3.8.0.tgz
+cd Python-3.8.0
+./configure --enable-optimizations
+make -j $(nproc)
+sudo make altinstall
+
+# optionally remove installation directory
+
+# cd ..
+# rm -r Python-3.8.0
+# rm Python-3.8.0.tgz
+"""
+        print(commands)
+        print("The above command might take 5 minutes to execute and will NOT "
+            "remove your current Python3 version. " +
+            "You can also install Python3.8 with your package manager. " + 
+            "Details must be confirmed according to your operating system.")
         return
     
     if os.getuid() != ROOT_ID:
