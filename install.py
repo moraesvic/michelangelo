@@ -48,9 +48,11 @@ TMP_FILE = rel_path("tmp_file.txt")
 ENV_FILE = rel_path(".env")
 CLIENT_ENV_FILE = rel_path("client/.env")
 
+PIP_COMMAND = None
+
 def get_pip_requirements():
     regex_first_line = re.compile(r"^\$ pip freeze")
-    regex_last_line = re.compile(r"^>>> PostgreSQL")
+    regex_last_line = re.compile(r"^>>> pip")
 
     req_file = open(REQUIREMENTS_FILE, "r")
 
@@ -81,7 +83,7 @@ def install_pip_requirements():
     run_command(". venv/bin/activate")
     
     # Installing dependencies
-    run_command(f"pip install -r {TMP_FILE}")
+    run_command(f"{PIP_COMMAND} install -r {TMP_FILE}")
 
     # Removing tmp_file
     os.remove(TMP_FILE)
@@ -197,6 +199,24 @@ location /michelangelo/ {
 -----"""
     print(block)
 
+def find_pip():
+    # Ugly code, need to improve later
+    try:
+        subprocess.run(f"which pip", shell=True, check=True)
+        PIP_COMMAND = "pip"
+    except subprocess.CalledProcessError:
+        try:
+            subprocess.run(f"which pip3", shell=True, check=True)
+            PIP_COMMAND = "pip3"
+        except subprocess.CalledProcessError:
+            try:
+                subprocess.run(f"which pip3.8", shell=True, check=True)
+                PIP_COMMAND = "pip3.8"
+            except subprocess.CalledProcessError:
+                print(f"It seems like pip is not installed in your computer.")
+                raise
+
+
 def main():
     version = sys.version_info
     if version.major != 3 or version.minor != 8:
@@ -229,12 +249,18 @@ sudo make altinstall
         return
 
     try:
-        check_dependencies(["psql", "npm"])
+        check_dependencies(["psql", "npm", "pip"])
     except subprocess.CalledProcessError:
         print("Install the missing software and run again.")
         return
 
     install_venv()
+    
+    try:
+        find_pip()
+    except:
+        return
+    
     get_pip_requirements()
     install_pip_requirements()
     install_db()

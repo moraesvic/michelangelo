@@ -42,6 +42,8 @@ uname_a="uname -a"
 python_version="python -V"
 pip_freeze="pip freeze"
 
+pip_version="pip -V"
+
 psql_version="psql -V"
 
 npm_version="npm -v"
@@ -70,6 +72,9 @@ printr "\n>>> Now python requirements."
 simulate_command $python_version
 printr "\n>>> You might want to paste the output of the following command to a separate file and run \"pip install -r FILE\""
 simulate_command $pip_freeze
+
+printr "\n>>> pip"
+simulate_command $pip_version
 
 printr "\n>>> PostgreSQL"
 simulate_command $psql_version
