@@ -1,6 +1,12 @@
 #!/usr/bin/env python3.8
 import os, re, subprocess, sys
 
+ROOT_ID = 0
+REQUIREMENTS_FILE = rel_path("requirements.txt")
+TMP_FILE = rel_path("tmp_file.txt")
+ENV_FILE = rel_path(".env")
+CLIENT_ENV_FILE = rel_path("client/.env")
+
 def rel_path(path, base_dir = ""):
     # This function is also defined elsewhere, but I wanted this to run
     # as standalone (not as a module)
@@ -41,15 +47,6 @@ def write_env(path, dic):
         f.write(f"{key}={value}\n")
     f.close()
 
-
-ROOT_ID = 0
-REQUIREMENTS_FILE = rel_path("requirements.txt")
-TMP_FILE = rel_path("tmp_file.txt")
-ENV_FILE = rel_path(".env")
-CLIENT_ENV_FILE = rel_path("client/.env")
-
-PIP_COMMAND = None
-
 def get_pip_requirements():
     regex_first_line = re.compile(r"^\$ pip freeze")
     regex_last_line = re.compile(r"^>>> pip")
@@ -75,7 +72,7 @@ def get_pip_requirements():
     tmp_file.write(buffer)
     tmp_file.close()
 
-def install_pip_requirements():
+def install_pip_requirements(pip_command):
     print("\n\nWe will now install pip requirements.\n")
     os.chdir(rel_path("."))
 
@@ -83,7 +80,7 @@ def install_pip_requirements():
     run_command(". venv/bin/activate")
     
     # Installing dependencies
-    run_command(f"{PIP_COMMAND} install -r {TMP_FILE}")
+    run_command(f"{pip_command} install -r {TMP_FILE}")
 
     # Removing tmp_file
     os.remove(TMP_FILE)
@@ -203,15 +200,15 @@ def find_pip():
     # Ugly code, need to improve later
     try:
         subprocess.run(f"which pip", shell=True, check=True)
-        PIP_COMMAND = "pip"
+        return "pip"
     except subprocess.CalledProcessError:
         try:
             subprocess.run(f"which pip3", shell=True, check=True)
-            PIP_COMMAND = "pip3"
+            return "pip3"
         except subprocess.CalledProcessError:
             try:
                 subprocess.run(f"which pip3.8", shell=True, check=True)
-                PIP_COMMAND = "pip3.8"
+                return "pip3.8"
             except subprocess.CalledProcessError:
                 print(f"It seems like pip is not installed in your computer.")
                 raise
@@ -257,12 +254,12 @@ sudo make altinstall
     install_venv()
 
     try:
-        find_pip()
+        pip_command = find_pip()
     except:
         return
     
     get_pip_requirements()
-    install_pip_requirements()
+    install_pip_requirements(pip_command)
     install_db()
     install_front_end()
     instructions_nginx()
