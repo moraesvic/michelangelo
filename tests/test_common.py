@@ -8,6 +8,7 @@ def printv(s: str):
     if VERBOSE:
         print(s)
 
-def rel_path(path):
-    this_dir = os.path.dirname(os.path.realpath(__file__))
-    return os.path.join(this_dir, path)
+def rel_path(path, base_dir = ""):
+    if not base_dir:
+        base_dir = os.path.dirname(os.path.realpath(__file__))
+    return os.path.join(base_dir, path)

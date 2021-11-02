@@ -1,51 +1,8 @@
-import requests, os, time
+# This file must be run as a module
+# e.g., from /michelangelo directory, run "python3.8 -m scripts.populate_db"
 
-URL = "http://localhost:7777/michelangelo"
-
-def rel_path(path):
-    this_dir = os.path.dirname(os.path.realpath(__file__))
-    return os.path.join(this_dir, path)
-
-def check_status_code(status_code):
-    if not (status_code >= 200 and status_code < 300):
-        raise Exception(f"Error: Server responded with code {status_code}")
-
-
-def post_picture(path):
-    pic = open(rel_path(path),"rb")
-    files = {"picture": pic}
-    endpoint = "/pictures"
-    r = requests.post(URL + endpoint, files=files)
-    check_status_code(r.status_code)
-    json = r.json()
-    return json["picName"], json["md5"]
-
-# picName":null,"md5":null,"prodName":"33","prodPrice":"hello","prodInStock":"5"}'
-def post_product(
-        prod_name: str,
-        prod_price: float,
-        prod_instock: int,
-        pic_path: str = "",
-        prod_descr: str = ""):
-
-    pic_name, pic_md5 = None, None
-    if pic_path:
-        pic_name, pic_md5 = post_picture(pic_path)
-
-    data = {
-        "picName": pic_name,
-        "md5": pic_md5,
-        "prodName": prod_name,
-        "prodPrice": prod_price,
-        "prodInStock": prod_instock,
-        "prodDescr": prod_descr
-    }
-    endpoint= "/products"
-    r = requests.post(URL + endpoint, json=data)
-    check_status_code(r.status_code)
-    json = r.json()
-    return json["picId"], json["prodId"]
-
+import time, os
+import tests.api_test as api_test
 
 products = [
     (
@@ -141,29 +98,34 @@ products = [
     )
 ]
 
-def add_products():
+special_product = (
+    "Web developer",
+    1995.20,
+    1,
+    "img/webdev.jpeg",
+    "Congratulations, you found the surprise offer! Special limited edition. Converts caffeine into code. (Price must be negotiated, terms and conditions apply)"
+)
+
+def add_products(base_dir = ""):
     count = 0
     while True:
         for product in products:
-            post_product(*product)
+            api_test.post_product(*product, base_dir = base_dir)
             print(".", end="", flush=True)
             count += 1
             if count == 16:
                 return
 
-
 def main():
+    if not api_test.is_server_connected():
+        raise Exception("Cannot populated database! Server is not connected!")
+
+    this_dir = os.path.dirname(__file__)
     print("Populating database... please be patient")
-    add_products()
+    add_products(base_dir = this_dir)
     time.sleep(1)
-    special_product = (
-        "Web developer",
-        1995.20,
-        1,
-        "img/webdev.jpeg",
-        "Congratulations, you found the surprise offer! Special limited edition. Converts caffeine into code. (Price must be negotiated, terms and conditions apply)"
-    )
-    post_product(*special_product)
+    api_test.post_product(*special_product, base_dir = this_dir)
     print("\ndone")
 
-main()
+if __name__ == "__main__":
+    main()

@@ -108,6 +108,8 @@ def get_md5_hash(path: str) -> str:
     regex = re.compile(r"^([0-9a-f]{32}).*$")
     match = regex.search(output)
 
+    print(f"output was {output}")
+
     if not match:
         raise Exception("Failed to calculate MD5 hash for file!")
 
