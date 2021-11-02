@@ -268,13 +268,15 @@ sudo make altinstall
     instructions_nginx()
 
     print("\n\nWell done! You are almost ready to go. Now what you have to do is: " + 
-    "go to project main folder, run the development server (./scripts/run_dev) " +
+    "go to project main folder, activate virtual environment (source ./venv/bin/activate), " + 
+    "run the development server (./scripts/run_dev) " +
     "and do the tests (./scripts/run_tests). If everything is ok, go ahead and " +
     "populate the database (./scripts/populate_db.py). Then, you can finally "
     "run the server in production mode (./scripts/run_prod)\n")
 
     print("TL;DR\n\n" + 
     "cd path/to/michelangelo\n" +
+    "source ./venv/bin/activate\n" +
     "./scripts/run_dev &\n" +
     "(^ you will need to let this running in the background)\n\n" +
     "./scripts/run_tests\n\n" +

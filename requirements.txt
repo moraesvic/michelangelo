@@ -30,9 +30,19 @@ waitress==2.0.0
 Werkzeug==2.0.2
 
 
+>>> pip
+$ pip -V
+pip 20.0.2 from /home/dinossauro/webdev/michelangelo/venv/lib/python3.8/site-packages/pip (python 3.8)
+
+
 >>> PostgreSQL
 $ psql -V
 psql (PostgreSQL) 12.8 (Ubuntu 12.8-0ubuntu0.20.04.1)
+
+
+>>> npm (package manager for the front-end)
+$ npm -v
+6.14.4
 
 
 >>> nginx
