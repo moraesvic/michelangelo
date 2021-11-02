@@ -1,4 +1,4 @@
-Development environment for michelangelo (31/10/2021)
+Development environment for michelangelo (02/11/2021)
 
 Please note that it is not STRICTLY required that EVERYTHING below follows the given version. For example, you will likely be fine running other Linux distro, another version of nginx, PostgreSQL and so on. Tests are designed to be tolerant enough and do not expect absolutely exact output, unless it is really necessary. In spite of that, if you have a problem reproducing the app's behavior, this could be a place to start debugging.
 
@@ -14,13 +14,18 @@ Python 3.8.10
 
 >>> You might want to paste the output of the following command to a separate file and run "pip install -r FILE"
 $ pip freeze
+certifi==2021.10.8
+charset-normalizer==2.0.7
 click==8.0.3
 Flask==2.0.2
+idna==3.3
 itsdangerous==2.0.1
 Jinja2==3.0.2
 MarkupSafe==2.0.1
 psycopg2==2.9.1
 python-dotenv==0.19.1
+requests==2.26.0
+urllib3==1.26.7
 waitress==2.0.0
 Werkzeug==2.0.2
 

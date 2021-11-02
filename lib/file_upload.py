@@ -82,19 +82,17 @@ def save_pic(
     # not a deterministic process
 
     md5 = file_utils.get_md5_hash(file_path)
-    
-    # The processing should occur asynchronously, but that will have to
-    # be implemented later
-    new_path = process_pic(file_path)
 
-    return (new_path, md5)
+    return (file_path, md5)
 
 def process_pic(path: str, max_size: int = 800) -> str:
     try:
         pic_utils.strip_pic_metadata(path)
         pic_utils.resize(path, max_size)
         pic_utils.convert(path)
-        # Convert will convert the picture to JPEG format (if it already isn't)
+
+        # Convert will sometimes convert the picture to JPEG format
+        # (if it results in a smaller size)
         # so we need to rename the extension accordingly
         new_path = file_utils.rename_mime_type(path)
     except Exception as err:

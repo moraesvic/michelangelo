@@ -60,7 +60,11 @@ LANGUAGE PLPGSQL;
 
 CREATE OR REPLACE FUNCTION fn_pic_upsert
 (my_pic_path TEXT, my_pic_md5 TEXT)
-RETURNS BIGINT
+RETURNS TABLE
+(
+    pic_id BIGINT,
+    pic_ref_count INT
+)
 AS
 $$
 INSERT INTO pics
@@ -77,6 +81,6 @@ ON CONFLICT(pic_md5) DO
     UPDATE
     SET
     pic_ref_count = pics.pic_ref_count + 1
-RETURNING pic_id ;
+RETURNING pic_id, pic_ref_count ;
 $$
 LANGUAGE SQL;

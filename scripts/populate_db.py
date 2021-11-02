@@ -1,4 +1,4 @@
-import requests, os
+import requests, os, time
 
 URL = "http://localhost:7777/michelangelo"
 
@@ -148,21 +148,22 @@ def add_products():
             post_product(*product)
             print(".", end="", flush=True)
             count += 1
-            if count == 60:
+            if count == 16:
                 return
 
 
 def main():
     print("Populating database... please be patient")
     add_products()
+    time.sleep(1)
     special_product = (
         "Web developer",
-        148.99,
-        20,
-        "img/victorian-gothic-dress.jpg",
-        "Congratulations, you Special limited edition. Converts caffeine into code. "
+        1995.20,
+        1,
+        "img/webdev.jpeg",
+        "Congratulations, you found the surprise offer! Special limited edition. Converts caffeine into code. (Price must be negotiated, terms and conditions apply)"
     )
     post_product(*special_product)
-    print()
+    print("\ndone")
 
 main()

@@ -62,13 +62,10 @@ def Pictures(
                     upload_path = app.config["UPLOAD_FOLDER"],
                     max_size = app.config["MAX_CONTENT_LENGTH"]
                 )
-                print(f"pic_path is {pic_path}")
-                print(f"md5 is {md5}")
                 json = jsonify({
                     "picName": os.path.basename(pic_path),
                     "md5": md5
                 })
-                print(json)
                 return json, 200
 
             except exceptions.BadRequest as err:

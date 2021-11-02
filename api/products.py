@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 
 import lib.exceptions as exceptions
 import api.pictures as pictures
+import lib.file_upload as file_upload
 
 # Using compiled version of regex for readability and (insignificant)
 # performance boost
@@ -169,7 +170,6 @@ def Products(
         # If anything goes wrong below, we will need to remove it
 
         form_data = req.get_json()
-        print(form_data)
 
         # We will do some casts and assert values are within what we expect,
         # but the DB also enforces these constraints. So it is just an extra
@@ -186,14 +186,33 @@ def Products(
         pic_id = None
         if pic_path:
             try:
-                pic_id = db.query("""
+                # Will return pic_ref_count and pic_id
+                result = db.query("""
                     SELECT *
                     FROM fn_pic_upsert
                     (
                         %s::text,
                         %s::text
                     ) ;
-                """, (pic_path, pic_md5) ).single()
+                """, (pic_path, pic_md5) ).json()[0]
+
+                pic_id = result["pic_id"]
+                pic_ref_count = result["pic_ref_count"]
+
+                if pic_ref_count > 1:
+                    # Picture was already in DB.
+                    # Let's delete file
+                    os.remove(pic_path)
+                else:
+                    # The processing should occur asynchronously, but that will have to
+                    # be implemented later
+                    pic_path = file_upload.process_pic(pic_path)
+
+                    db.query("""
+                        UPDATE pics
+                        SET pic_path = %s::text
+                        WHERE pic_id = %s::bigint ;
+                    """, (pic_path, pic_id) )
                 
             except Exception as err:
                 os.remove(pic_path)
