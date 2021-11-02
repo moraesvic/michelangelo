@@ -7,8 +7,43 @@ def rel_path(path, base_dir = ""):
         base_dir = os.path.dirname(os.path.realpath(__file__))
     return os.path.join(base_dir, path)
 
-ROOT_ID = 1000 # later change to 0
+def run_command(cmd):
+    # Will output lines to screen as soon as they are received
+    with subprocess.Popen(
+        cmd,
+        shell = True,
+        text = True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT
+    ) as proc:
+        for line in proc.stdout:
+            print(line, end="", flush=True)
+
+def read_env(path):
+    f = open(path, "r")
+    dic = dict()
+    regex = re.compile(r"^(.+)=(.+)$")
+
+    line = f.readline()
+    while line:
+        match = regex.search(line)
+        if match:
+            dic[match.groups()[0]] = match.groups()[1]
+        line = f.readline()
+
+    f.close()
+    return dic
+
+def write_env(path, dic):
+    f = open(path, "w")
+    for key, value in dic.items():
+        f.write(f"{key}={value}\n")
+    f.close()
+
+
+ROOT_ID = 0
 TMP_FILE = rel_path("tmp_file.txt")
+ENV_FILE = rel_path(".env")
 
 def get_pip_requirements():
     regex_first_line = re.compile(r"^\$ pip freeze")
@@ -36,21 +71,74 @@ def get_pip_requirements():
     tmp_file.close()
 
 def install_pip_requirements():
+    print("\n\nWe will now install pip requirements.\n")
     os.chdir(rel_path("."))
 
     # Source from virtual environment
-    subprocess.check_output(
-        ". venv/bin/activate",
-        shell = True)
+    run_command(". venv/bin/activate")
     
-    subprocess.check_output(
-        f"pip install -r {TMP_FILE}",
+    # Installing dependencies
+    run_command(f"pip install -r {TMP_FILE}")
+
+    # Removing tmp_file
+    os.remove(TMP_FILE)
+
+def change_env(uname, password, database, host, port):
+    current_env = read_env(ENV_FILE)
+
+    print(current_env)
+    current_env["POSTGRES_USER"] = uname
+    current_env["POSTGRES_PASSWORD"] = password
+    current_env["POSTGRES_DATABASE"] = database
+    current_env["POSTGRES_HOST"] = host
+    current_env["POSTGRES_PORT"] = port
+    current_env["APP_NAME"] = "michelangelo"
+
+    print(current_env)
+    write_env(ENV_FILE, current_env)
+
+def install_db():
+    print("\n\nWe will now install the database.\n")
+
+    uname = input("Please type in the username.  ")
+    password = input("Now type in the password. (Sorry, we will echo it to screen, please make sure nobody is looking ¯\_(ツ)_/¯)  ")
+    database = input("Type the name of the new database.  ")
+    command = f"""\
+sudo -i -u postgres \
+    psql                                                                    \
+        -c "CREATE USER {uname} WITH ENCRYPTED PASSWORD '{password}'; "     \
+        -c "CREATE DATABASE {database}; "                                   \
+        -c "GRANT ALL PRIVILEGES ON DATABASE {database} TO {uname}; "       \
+"""
+    run_command(command)
+
+    host="localhost"
+    port=5432
+    
+    files = subprocess.check_output("""\
+        find ./sql      \
+        -maxdepth 1     \
+        -type f         \
+    """,
         shell = True,
         text = True
-    )
+        ).strip().split("\n")
 
-    # os.remove(TMP_FILE)
+    files.sort()
 
+    for file in files:
+        print(f"Installing file {file}")
+        import_command = f"""       \
+PGPASSWORD="{password}" \
+psql -U "{uname}"       \
+    -h "{host}"         \
+    -d "{database}"     \
+    -p "{port}"         \
+    -f "{file}"         \
+"""
+        run_command(import_command)
+
+    change_env(uname, password, database, host, port)
 
 def main():
     if os.getuid() != ROOT_ID:
@@ -59,6 +147,11 @@ def main():
 
     get_pip_requirements()
     install_pip_requirements()
+    install_db()
+
+    # Run tests
+    # Delete
+    # Populate
 
 if __name__ == "__main__":
     main()
