@@ -14,8 +14,6 @@ function DeletionButton(props)
             });
         if (ret.status === 200) {
             alert(`Product was deleted! Bye-bye, product!`);
-            const json = await ret.json();
-            const prodId = json.prodId
             const viewPage = myPath.linkTo(`/`);
             window.location.pathname = viewPage;
         }

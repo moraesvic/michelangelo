@@ -16,7 +16,10 @@ function ProductContent(props)
     (
         <div className="product-page">
             <h1>{product.prod_name}</h1>
-            <ImageHref id={product.pic_id} alt={product.prod_descr || ""} />
+            <ImageHref
+            id={product.pic_id}
+            alt={product.prod_descr || ""}
+            height="300px" />
             <div className="prod-descr">
                 <p>{product.prod_descr || ""}</p>
             </div>

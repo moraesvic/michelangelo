@@ -28,6 +28,13 @@ function trim(text)
 
 function ProductList(props)
 {
+    /*
+    The idea was to use lazy loading to make top images load first and not
+    have everything at once. It might not be very effective, depending on
+    the browser (Chrome is very impatient), but the idea is there for
+    future use.
+    https://stackoverflow.com/questions/57753240/native-lazy-loading-loading-lazy-not-working-even-with-flags-enabled
+    */
     const [products, setProducts] = React.useState([]);
 
     React.useEffect(() => {
@@ -41,7 +48,8 @@ function ProductList(props)
     }, [props.page]);
 
     const classList = ["blue", "yellow", "green", "red"];
-    let keyIndex = Math.floor ( Math.random() * classList.length );    
+    const keyFirst = Math.floor ( Math.random() * classList.length );
+    let keyIndex = keyFirst;    
 
     return (
         <section className="flex-container">
@@ -59,7 +67,10 @@ function ProductList(props)
                 <div className="center">
                     <div className="pic-box">
                         <a href={myPath.linkTo(`/view/${prod.prod_id}`)}>
-                            <Image id={prod.pic_id} alt={prod.prod_descr} />
+                            <Image
+                            id={prod.pic_id}
+                            alt={prod.prod_descr}
+                            loading={keyIndex - keyFirst > 3 ? "lazy" : "eager"} />
                         </a>
                     </div>
                     <p className="card-title">

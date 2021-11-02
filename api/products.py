@@ -169,6 +169,7 @@ def Products(
         # If anything goes wrong below, we will need to remove it
 
         form_data = req.get_json()
+        print(form_data)
 
         # We will do some casts and assert values are within what we expect,
         # but the DB also enforces these constraints. So it is just an extra
@@ -225,7 +226,6 @@ def Products(
             )
 
             return jsonify({
-                "success": True,
                 "picId": pic_id,
                 "prodId": result.json()[0]["prod_id"]
                 })
