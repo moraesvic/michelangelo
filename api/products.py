@@ -104,7 +104,7 @@ def Products(
         app,
         db):
 
-    @app.get("/list-products")
+    @app.get("/products")
     def get_list_products():
         # This number is defined here and in the front-end
         # Perhaps in the future I will create some environment variable

@@ -44,6 +44,8 @@ pip_freeze="pip freeze"
 
 psql_version="psql -V"
 
+npm_version="npm -v"
+
 # For some weird reason, nginx version outputs to stderr
 nginx_version="nginx -v"
 
@@ -71,6 +73,9 @@ simulate_command $pip_freeze
 
 printr "\n>>> PostgreSQL"
 simulate_command $psql_version
+
+printr "\n>>> npm (package manager for the front-end)"
+simulate_command $npm_version
 
 printr "\n>>> nginx"
 simulate_command $nginx_version

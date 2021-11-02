@@ -43,14 +43,16 @@ def write_env(path, dic):
 
 
 ROOT_ID = 0
+REQUIREMENTS_FILE = rel_path("requirements.txt")
 TMP_FILE = rel_path("tmp_file.txt")
 ENV_FILE = rel_path(".env")
+CLIENT_ENV_FILE = rel_path("client/.env")
 
 def get_pip_requirements():
     regex_first_line = re.compile(r"^\$ pip freeze")
     regex_last_line = re.compile(r"^>>> PostgreSQL")
 
-    req_file = open(rel_path("requirements.txt"), "r")
+    req_file = open(REQUIREMENTS_FILE, "r")
 
     # Search for beginning of pip requirements
     line = req_file.readline()
@@ -141,6 +143,34 @@ psql -U "{uname}"       \
 
     change_env(uname, password, database, host, port)
 
+def check_dependencies(dependencies):
+    for dep in dependencies:
+        try:
+            subprocess.run(f"which {dep}", shell=True, check=True)
+        except subprocess.CalledProcessError:
+            print(f"It seems like {dep} is not installed in your computer.")
+            raise
+
+def install_front_end():
+    print("We will now proceed with the front-end installation")
+
+    os.chdir(rel_path("./client"))
+
+    run_command("npm install")
+    run_command("npm audit fix")
+
+    dic = {
+        "BROWSER": "none",
+        "PORT": 7777,
+        "BACKEND_PORT": 9999,
+        "PUBLIC_URL": "/michelangelo"
+    }
+    write_env(CLIENT_ENV_FILE, dic)
+    BROWSER=none
+    PORT=7777
+    BACKEND_PORT=9999
+    PUBLIC_URL=/michelangelo
+
 def main():
     version = sys.version_info
     if version.major != 3 or version.minor != 8:
@@ -151,9 +181,16 @@ def main():
         print("This script must be run as root")
         return
 
+    try:
+        check_dependencies(["psql", "npm"])
+    except subprocess.CalledProcessError:
+        print("Install the missing software and run again.")
+        return
+
     get_pip_requirements()
     install_pip_requirements()
     install_db()
+    install_front_end()
 
     print("\n\nWell done! You are almost ready to go. Now what you have to do is: " + 
     "go to project main folder, run the development server (./scripts/run_dev) " +
@@ -161,7 +198,15 @@ def main():
     "populate the database (./scripts/populate_db.py). Then, you can finally "
     "run the server in production mode (./scripts/run_prod)\n")
 
-    print("\nIf anything doesn't work, keep calm and don't panic.")
+    print("TL;DR\n\n" + 
+    "cd path/to/michelangelo\n" +
+    "./scripts/run_dev &\n" +
+    "(^ you will need to let this running in the background)\n\n" +
+    "./scripts/run_tests\n\n" +
+    "(you can now stop the development environment)\n" +
+    "./scripts/run_prod\n")
+
+    print("If anything doesn't work, keep calm and don't panic.")
 
 if __name__ == "__main__":
     main()

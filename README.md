@@ -62,7 +62,6 @@ module.exports = function (app) {
 
   app.use(
     [
-      `${prefix}/list-products`,
       `${prefix}/products`,
       `${prefix}/pictures`],
     createProxyMiddleware({

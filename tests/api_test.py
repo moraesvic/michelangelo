@@ -1,4 +1,4 @@
-import requests, unittest, subprocess
+import requests, unittest, subprocess, datetime
 
 import lib.db as db
 import lib.file_utils as file_utils
@@ -36,17 +36,19 @@ def post_product(
         prod_descr: str = "",
         base_dir: str = ""):
 
-    pic_md5 = None, None
+    pic_md5 = None
     if pic_path:
         pic_md5 = post_picture(pic_path, base_dir = base_dir)
 
     data = {
-        "md5": pic_md5,
         "prodName": prod_name,
         "prodPrice": prod_price,
         "prodInStock": prod_instock,
         "prodDescr": prod_descr
     }
+    if pic_md5:
+        data["md5"] = pic_md5
+
     endpoint= "/products"
     r = requests.post(URL + endpoint, json=data)
     check_status_code(r.status_code)
@@ -255,6 +257,25 @@ class FileUploadTest(unittest.TestCase):
 
         later_db_pics, _ = self.assert_db_filesystem_integrity()
         self.assertEqual(len(orig_db_pics), len(later_db_pics))
+
+    def test_bulk_post_products(self):
+        # Let's post a lot of products (without pics) and see how much time
+        # it takes
+
+        start = datetime.datetime.now()
+        n_products = 1000
+        for _ in range(n_products):
+            post_product(
+                "This is a test product",
+                19.99,
+                42,
+                prod_descr = "This is a moderately long description. Not too long and not too short. Mundane and average."
+            )
+        end = datetime.datetime.now()
+        time_elapsed = (end - start).total_seconds()
+
+        print(f"We posted {n_products} products in {time_elapsed:.3f} seconds")
+        print(f"This means {time_elapsed / n_products : .5f} sec / product")
 
 
 if __name__ == "__main__":

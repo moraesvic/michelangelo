@@ -7,7 +7,6 @@ module.exports = function (app) {
   app.use(
     createProxyMiddleware(
       [
-        `${prefix}/list-products`,
         `${prefix}/products`,
         `${prefix}/pictures`
       ],
