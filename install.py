@@ -1,12 +1,6 @@
 #!/usr/bin/env python3.8
 import os, re, subprocess, sys
 
-ROOT_ID = 0
-REQUIREMENTS_FILE = rel_path("requirements.txt")
-TMP_FILE = rel_path("tmp_file.txt")
-ENV_FILE = rel_path(".env")
-CLIENT_ENV_FILE = rel_path("client/.env")
-
 def rel_path(path, base_dir = ""):
     # This function is also defined elsewhere, but I wanted this to run
     # as standalone (not as a module)
@@ -46,6 +40,18 @@ def write_env(path, dic):
     for key, value in dic.items():
         f.write(f"{key}={value}\n")
     f.close()
+
+############################################################
+# CONSTANTS
+############################################################
+
+ROOT_ID = 0
+REQUIREMENTS_FILE = rel_path("requirements.txt")
+TMP_FILE = rel_path("tmp_file.txt")
+ENV_FILE = rel_path(".env")
+CLIENT_ENV_FILE = rel_path("client/.env")
+
+############################################################
 
 def get_pip_requirements():
     regex_first_line = re.compile(r"^\$ pip freeze")
