@@ -172,7 +172,7 @@ def install_venv():
 
     os.chdir(rel_path("."))
 
-    run_command("python3.8 -v venv venv")
+    run_command("python3.8 -m venv venv")
     run_command(". venv/bin/activate")
 
 def instructions_nginx():
