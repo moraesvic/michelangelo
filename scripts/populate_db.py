@@ -106,10 +106,15 @@ special_product = (
     "Congratulations, you found the surprise offer! Special limited edition. Converts caffeine into code. (Price must be negotiated, terms and conditions apply)"
 )
 
-def add_products(base_dir = ""):
+def add_products(base_dir = "", throttle = False):
     count = 0
     while True:
         for product in products:
+            if count > len(products) and throttle:
+                # You might want to throttle a little bit just to avoid race
+                # conditions that wouldn't be realistic in a real case scenario
+                time.sleep(0.1)
+
             api_test.post_product(*product, base_dir = base_dir)
             print(".", end="", flush=True)
             count += 1

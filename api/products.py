@@ -22,29 +22,12 @@ def validate_post_data(form_data, upload_folder):
 
         # Not mandatory fields
         prod_descr = form_data.get("prodDescr", None)
-        pic_name = form_data.get("picName", None)
         pic_md5 = form_data.get("md5", None)
-
-        # However, if it is given, it must be valid
-        # Sanitize to avoid an attack with something like picName = "../../../home"
-        if pic_name:
-            pic_basename = os.path.basename(pic_name)
-            pic_path = os.path.join(
-                    upload_folder,
-                    pic_basename
-            )
-            if not os.path.isfile(pic_path):
-                raise exceptions.BadRequest("File does not exist.")
-
-        if (pic_name and not pic_md5) or (not pic_name and pic_md5):
-            # If one of them is present, the other must be as well
-            raise exceptions.BadRequest("File name for picture and MD5 hash must be provided together.")
-
        
         if pic_md5 and not REGEX_MD5.search(pic_md5):
             raise exceptions.BadRequest("Field 'MD5 hash' has invalid value.")
 
-        return prod_name, prod_descr, prod_price, prod_instock, pic_path, pic_md5
+        return prod_name, prod_descr, prod_price, prod_instock, pic_md5
 
     except (KeyError, ValueError, exceptions.BadRequest) as orig_exc:
         # A required field is not present, cannot be cast into required
@@ -176,7 +159,7 @@ def Products(
         # layer of security
 
         try:
-            prod_name, prod_descr, prod_price, prod_instock, pic_path, pic_md5 = \
+            prod_name, prod_descr, prod_price, prod_instock, pic_md5 = \
                     validate_post_data(form_data, app.config["UPLOAD_FOLDER"])
         except exceptions.BadRequest as err:
             exceptions.printerr(err)
@@ -184,26 +167,23 @@ def Products(
 
         # Save picture to database (thus far, it was only in disk)
         pic_id = None
-        if pic_path:
+        if pic_md5:
             try:
-                # Will return pic_ref_count and pic_id
                 result = db.query("""
-                    SELECT *
-                    FROM fn_pic_upsert
-                    (
-                        %s::text,
-                        %s::text
-                    ) ;
-                """, (pic_path, pic_md5) ).json()[0]
+                    SELECT pic_id, pic_path, pic_ref_count
+                    FROM pics
+                    WHERE pic_md5 = %s::text
+                    LIMIT 1 ;
+                """, (pic_md5, ) ).json()[0]
 
                 pic_id = result["pic_id"]
+                pic_path = result["pic_path"]
                 pic_ref_count = result["pic_ref_count"]
 
-                if pic_ref_count > 1:
-                    # Picture was already in DB.
-                    # Let's delete file
-                    os.remove(pic_path)
-                else:
+                if pic_ref_count == 1:
+                    # This means that the picture was first uploaded for this
+                    # product, and has to be updated now
+
                     # The processing should occur asynchronously, but that will have to
                     # be implemented later
                     pic_path = file_upload.process_pic(pic_path)

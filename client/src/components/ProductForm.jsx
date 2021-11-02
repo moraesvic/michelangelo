@@ -37,7 +37,6 @@ function ProductForm(props) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        let picName = null;
         let md5 = null;
 
         /* First let's send the file, if there's any */
@@ -53,7 +52,7 @@ function ProductForm(props) {
             );
             if (ret.status === 200) {
                 let parsed = await ret.json();
-                [picName, md5] = [parsed.picName, parsed.md5]
+                md5 = parsed.md5
             }
             else {
                 alert(`Error uploading picture: ${await ret.text()}`);
@@ -63,7 +62,6 @@ function ProductForm(props) {
         }
 
         let payload = {};
-        payload["picName"] = picName;
         payload["md5"] = md5;
 
         for (let [key, value] of Object.entries(formDict))

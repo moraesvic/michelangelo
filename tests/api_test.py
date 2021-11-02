@@ -26,7 +26,7 @@ def post_picture(path, base_dir = ""):
     pic.close()
     check_status_code(r.status_code)
     json = r.json()
-    return json["picName"], json["md5"]
+    return json["md5"]
 
 # picName":null,"md5":null,"prodName":"33","prodPrice":"hello","prodInStock":"5"}'
 def post_product(
@@ -37,12 +37,11 @@ def post_product(
         prod_descr: str = "",
         base_dir: str = ""):
 
-    pic_name, pic_md5 = None, None
+    pic_md5 = None, None
     if pic_path:
-        pic_name, pic_md5 = post_picture(pic_path, base_dir = base_dir)
+        pic_md5 = post_picture(pic_path, base_dir = base_dir)
 
     data = {
-        "picName": pic_name,
         "md5": pic_md5,
         "prodName": prod_name,
         "prodPrice": prod_price,
@@ -55,14 +54,30 @@ def post_product(
     json = r.json()
     return json["picId"], json["prodId"]
 
+def delete_products():
+    endpoint = "/products/all"
+    r = requests.delete(URL + endpoint)
+    check_status_code(r.status_code)
+    return r.text
+
+def delete_pictures():
+    endpoint = "/pictures/all"
+    r = requests.delete(URL + endpoint)
+    check_status_code(r.status_code)
+    return r.text
+
 class FileUploadTest(unittest.TestCase):
     db = db.DB()
     upload_path = rel_path("../uploads")
 
     @classmethod
     def setUpClass(cls):
+        printv("Setting up...")
         if not is_server_connected():
             raise Exception("Server was not connected! Cannot proceed with testing!")
+        printv("Deleting existing database...")
+        printv(delete_products())
+        printv(delete_pictures())
 
     @classmethod
     def tearDownClass(cls):
@@ -111,9 +126,6 @@ class FileUploadTest(unittest.TestCase):
         db_pics = self.select_pictures()
         ls_pics = self.ls_uploaded_pics()
 
-        print(db_pics)
-        print(ls_pics)
-
         # If the number of files is not the same, we stop here
         if len(db_pics) != len(ls_pics):
             self.assertTrue(False)
@@ -141,7 +153,7 @@ class FileUploadTest(unittest.TestCase):
 
         file_path = rel_path("test_files/normal_file.txt")
         with self.assertRaisesRegex(Exception, r"^Error: Server responded with code 400"):
-            pic_name, md5 = post_picture(file_path)
+            md5 = post_picture(file_path)
 
         later_db_pics, _ = self.assert_db_filesystem_integrity()
         self.assertListEqual(orig_db_pics, later_db_pics)
@@ -152,13 +164,31 @@ class FileUploadTest(unittest.TestCase):
         orig_db_pics, _ = self.assert_db_filesystem_integrity()
 
         file_path = rel_path("test_files/bears.jpg")
-        pic_name, md5 = post_picture(file_path)
+        md5 = post_picture(file_path)
 
         calculated_md5 = file_utils.get_md5_hash(file_path)
         self.assertEqual(md5, calculated_md5)
 
-        later_db_pics = self.assert_db_filesystem_integrity()
-        self.assertEqual(len(orig_db_pics), len(later_db_pics) + 1)
+        later_db_pics, _ = self.assert_db_filesystem_integrity()
+        self.assertEqual(len(orig_db_pics) + 1, len(later_db_pics))
+
+    def test_post_picture_3(self):
+        # Here, we will try to post a picture that already exists in the
+        # system. The returned md5 should be the same, and the number of
+        # rows in DB should not change
+
+        # By default, tests run in alphabetical order, so this should be
+        # run after test_post_picture_2
+        orig_db_pics, _ = self.assert_db_filesystem_integrity()
+
+        file_path = rel_path("test_files/bears.jpg")
+        md5 = post_picture(file_path)
+
+        calculated_md5 = file_utils.get_md5_hash(file_path)
+        self.assertEqual(md5, calculated_md5)
+
+        later_db_pics, _ = self.assert_db_filesystem_integrity()
+        self.assertEqual(len(orig_db_pics), len(later_db_pics))
 
 
 if __name__ == "__main__":

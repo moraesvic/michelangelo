@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
 curl -v -X DELETE "http://localhost:7777/michelangelo/products/all"
+curl -v -X DELETE "http://localhost:7777/michelangelo/pictures/all"
