@@ -175,6 +175,28 @@ def install_venv():
     run_command("python3.8 -v venv venv")
     run_command(". venv/bin/activate")
 
+def instructions_nginx():
+    print("This app was made for using in production with Nginx as a reverse proxy.")
+    print("We will NOT do this configuration for you, as it might break your existing servers")
+    print("We advise you to edit your conf.d file in /etc/nginx and insert the " +
+        "following directive in the server block:")
+    block = """-----
+
+location = /michelangelo {
+    return 302 /michelangelo/;
+}
+
+location /michelangelo/ {
+    rewrite /michelangelo/(.*) /$1 break;
+    proxy_pass http://localhost:7777/michelangelo/;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Forwarded-For $remote_addr;
+
+}
+
+-----"""
+    print(block)
+
 def main():
     version = sys.version_info
     if version.major != 3 or version.minor != 8:
@@ -196,6 +218,7 @@ def main():
     install_pip_requirements()
     install_db()
     install_front_end()
+    instructions_nginx()
 
     print("\n\nWell done! You are almost ready to go. Now what you have to do is: " + 
     "go to project main folder, run the development server (./scripts/run_dev) " +
