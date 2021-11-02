@@ -249,13 +249,13 @@ sudo make altinstall
         return
 
     try:
-        check_dependencies(["psql", "npm", "pip"])
+        check_dependencies(["psql", "npm"])
     except subprocess.CalledProcessError:
         print("Install the missing software and run again.")
         return
 
     install_venv()
-    
+
     try:
         find_pip()
     except:
