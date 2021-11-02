@@ -1,3 +1,0 @@
--- apply easter egg in main branch
--- documentation
--- refactor React and remove all handling of PUBLIC_URL, as basename HTML header will take care of that

@@ -28,7 +28,6 @@ def post_picture(path, base_dir = ""):
     json = r.json()
     return json["md5"]
 
-# picName":null,"md5":null,"prodName":"33","prodPrice":"hello","prodInStock":"5"}'
 def post_product(
         prod_name: str,
         prod_price: float,
