@@ -1,4 +1,5 @@
-import os, re, subprocess
+#!/usr/bin/env python3.8
+import os, re, subprocess, sys
 
 def rel_path(path, base_dir = ""):
     # This function is also defined elsewhere, but I wanted this to run
@@ -141,6 +142,11 @@ psql -U "{uname}"       \
     change_env(uname, password, database, host, port)
 
 def main():
+    version = sys.version_info
+    if version.major != 3 or version.minor != 8:
+        print("Script (and app) must be run with Python3.8")
+        return
+    
     if os.getuid() != ROOT_ID:
         print("This script must be run as root")
         return
@@ -149,9 +155,13 @@ def main():
     install_pip_requirements()
     install_db()
 
-    # Run tests
-    # Delete
-    # Populate
+    print("\n\nWell done! You are almost ready to go. Now what you have to do is: " + 
+    "go to project main folder, run the development server (./scripts/run_dev) " +
+    "and do the tests (./scripts/run_tests). If everything is ok, go ahead and " +
+    "populate the database (./scripts/populate_db.py). Then, you can finally "
+    "run the server in production mode (./scripts/run_prod)\n")
+
+    print("\nIf anything doesn't work, keep calm and don't panic.")
 
 if __name__ == "__main__":
     main()

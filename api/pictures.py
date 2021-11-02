@@ -140,3 +140,49 @@ def Pictures(
         else:
             # Accessing the route without the required fields / encoding
             return exceptions.BadRequest.response()
+
+    @app.delete("/pictures/orphan")
+    def delete_pictures_orphan():
+        # This will delete all pictures that do not have an associated product.
+        # This can be run periodically to clean database.
+
+        # An alternative for the last part of the query is
+        # """
+        # WHERE pics.pics_id IN (SELECT * FROM cte)
+        # """
+        # As far as I tested (not much), they are similar regarding performance.
+        # According to this post (https://pt.stackoverflow.com/questions/417582/diferen%C3%A7a-entre-exists-e-in-no-postgres)
+        # WHERE ... IN should have better performance, because the SELECT statement
+        # is just run once, but in practice they have the same performance, because
+        # Postgres is smart enough to optimize it (as seen with command EXPLAIN)
+
+        try:
+            result = db.query("""
+                WITH cte AS
+                (
+                    SELECT
+                        pics.pic_id AS pic_id
+                    FROM pics
+                    LEFT JOIN products
+                    ON pics.pic_id = products.pic_id
+                    WHERE products.prod_id IS NULL 
+                )
+                DELETE
+                FROM pics
+                WHERE EXISTS
+                (
+                    SELECT
+                    FROM cte
+                    WHERE pic_id = pics.pic_id
+                )
+                RETURNING pics.pic_path;
+            """)
+            
+            for row in result.rows:
+                os.remove(row[0])
+            
+            return f"Success! {result.row_count} orphan pictures removed."
+
+        except Exception as err:
+            exceptions.printerr(err)
+            return exceptions.InternalServerError.response()

@@ -10,7 +10,7 @@ import lib.file_upload as file_upload
 # performance boost
 REGEX_MD5 = re.compile(r"^[0-9a-f]{32}$")
 
-def validate_post_data(form_data, upload_folder):
+def validate_post_data(db, form_data, upload_folder):
     pic_path = None
     try:
         prod_name = form_data["prodName"]
@@ -27,16 +27,27 @@ def validate_post_data(form_data, upload_folder):
         if pic_md5 and not REGEX_MD5.search(pic_md5):
             raise exceptions.BadRequest("Field 'MD5 hash' has invalid value.")
 
+        if prod_price <= 0 or prod_instock < 0:
+            raise exceptions.BadRequest("Numeric fields contain invalid value.")
+
         return prod_name, prod_descr, prod_price, prod_instock, pic_md5
 
     except (KeyError, ValueError, exceptions.BadRequest) as orig_exc:
         # A required field is not present, cannot be cast into required
         # type, or supplied file name is invalid
         try:
-            os.remove(pic_path)
+            print("now we will delete the picture")
+            pic_id = db.query("""
+                SELECT pic_id
+                FROM pics
+                WHERE pic_md5 = %s::text
+                LIMIT 1 ;
+            """, (pic_md5,) ).single()
+            print(f"pic_md5 is {pic_md5}")
+            pictures.decrease_picture_count(db, pic_id)
 
-        except (FileNotFoundError, TypeError):
-            # picName is None or does not correspond to a file in disk
+        except Exception as err:
+            # pic_md5 is None or does not correspond to a file in disk
             # This "except" doesn't do anything, I just thought I should
             # consider this situation
             pass
@@ -160,7 +171,7 @@ def Products(
 
         try:
             prod_name, prod_descr, prod_price, prod_instock, pic_md5 = \
-                    validate_post_data(form_data, app.config["UPLOAD_FOLDER"])
+                    validate_post_data(db, form_data, app.config["UPLOAD_FOLDER"])
         except exceptions.BadRequest as err:
             exceptions.printerr(err)
             return err.response()

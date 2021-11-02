@@ -65,6 +65,12 @@ def delete_pictures():
     check_status_code(r.status_code)
     return r.text
 
+def delete_pictures_orphan():
+    endpoint = "/pictures/orphan"
+    r = requests.delete(URL + endpoint)
+    check_status_code(r.status_code)
+    return r.text
+
 class FileUploadTest(unittest.TestCase):
     db = db.DB()
     upload_path = rel_path("../uploads")
@@ -80,18 +86,10 @@ class FileUploadTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        if VERBOSE:
-            print("Printing contents of test directory before cleaning up")
-            print("***")
-
-            test_files_path = rel_path("test_files")
-            print(subprocess.check_output(
-                f"ls {test_files_path}",
-                shell = True,
-                text = True
-                ))
-
-            print("***")
+        printv("Tearing down...")
+        printv("Deleting existing database...")
+        printv(delete_products())
+        printv(delete_pictures())
 
     def select_pictures(self):
         # We will order by pic_id to get a deterministic result
@@ -99,6 +97,14 @@ class FileUploadTest(unittest.TestCase):
             SELECT *
             FROM pics
             ORDER BY pic_id ;
+        """).json()
+
+    def select_products(self):
+        # We will order by prod_id to get a deterministic result
+        return self.db.query("""
+            SELECT *
+            FROM products
+            ORDER BY prod_id ;
         """).json()
 
     def ls_uploaded_pics(self):
@@ -137,9 +143,6 @@ class FileUploadTest(unittest.TestCase):
         # Since we have already fetched everything, might as well return
         # it and maybe save an operation later
         return db_pics, ls_pics
-
-    def select_products(self):
-        pass
 
     def test_post_picture_1(self):
         # Here, we will send a text file and expect it to be rejected
@@ -185,6 +188,70 @@ class FileUploadTest(unittest.TestCase):
 
         calculated_md5 = file_utils.get_md5_hash(file_path)
         self.assertEqual(md5, calculated_md5)
+
+        later_db_pics, _ = self.assert_db_filesystem_integrity()
+        self.assertEqual(len(orig_db_pics), len(later_db_pics))
+
+    def test_post_product_1(self):
+        # Let's try to post an invalid product. The picture will be legit,
+        # but the price will be a negative number
+
+        # Number of products and pictures should remain the same
+        orig_db_pics, _ = self.assert_db_filesystem_integrity()
+        orig_prods = self.select_products()
+
+        # post_product will give us the correct directory
+        file_path = "test_files/logo.png"
+        with self.assertRaisesRegex(Exception, r"^Error: Server responded with code 400"):
+            post_product(
+                "Invalid product",
+                -3.14,
+                15,
+                pic_path = file_path,
+                prod_descr = "This is an impossible product"
+            )
+
+        later_db_pics, _ = self.assert_db_filesystem_integrity()
+        self.assertEqual(len(orig_db_pics), len(later_db_pics))
+
+        later_prods = self.select_products()
+        self.assertListEqual(orig_prods, later_prods)
+
+    def test_post_product_2(self):
+        # Let's try to post a legith product.
+        # Number of products and pictures should raise by one
+        orig_db_pics, _ = self.assert_db_filesystem_integrity()
+        orig_prods = self.select_products()
+
+        # post_product will give us the correct directory
+        file_path = "test_files/logo.png"
+        post_product(
+            "VULPI Ideas",
+            999.999,
+            1,
+            pic_path = file_path,
+            prod_descr = "Solutions for language learning and more"
+        )
+
+        later_db_pics, _ = self.assert_db_filesystem_integrity()
+        self.assertEqual(len(orig_db_pics) + 1, len(later_db_pics))
+
+        later_prods = self.select_products()
+        self.assertEqual(len(orig_prods) + 1, len(later_prods))
+
+    def test_delete_orphan_products(self):
+        # We will post a picture without an associated product, and then
+        # issue delete orphan picture request and see if it was removed
+        orig_db_pics, _ = self.assert_db_filesystem_integrity()
+
+        file_path = rel_path("test_files/ladybird.jpg")
+        md5 = post_picture(file_path)
+
+        later_db_pics, _ = self.assert_db_filesystem_integrity()
+        self.assertEqual(len(orig_db_pics) + 1, len(later_db_pics))
+        
+        result = delete_pictures_orphan()
+        self.assertRegex(result, r"^Success! [0-9]+ orphan pictures removed.")
 
         later_db_pics, _ = self.assert_db_filesystem_integrity()
         self.assertEqual(len(orig_db_pics), len(later_db_pics))
