@@ -2,7 +2,7 @@ import time, re, random, unittest, subprocess
 from werkzeug.datastructures import FileStorage
 
 from lib.file_upload import *
-from lib.file_utils import N_RANDOM_BYTES
+import lib.file_utils as file_utils
 from tests.test_common import *
 
 class FileUploadTest(unittest.TestCase):
@@ -56,7 +56,7 @@ class FileUploadTest(unittest.TestCase):
 
     def get_filename_regex(self):
         milliseconds_length = len(str(int(time.time() * 1000)))
-        random_number_length = N_RANDOM_BYTES * 2
+        random_number_length = file_utils.N_RANDOM_BYTES * 2
         return re.compile(r"[0-9]{%d}-[0-9a-f]{%d}" % (
             milliseconds_length, random_number_length))
 
@@ -66,7 +66,7 @@ class FileUploadTest(unittest.TestCase):
         for _ in range(NUMBER_OF_TESTS):
             with self.subTest():
                 time.sleep(random.random() * 0.05)
-                new_name = get_new_name()
+                new_name = file_utils.get_new_name()
                 if self.assertRegex(new_name, regex):
                     printv(f"{new_name} : ok!")
 
