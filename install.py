@@ -166,10 +166,14 @@ def install_front_end():
         "PUBLIC_URL": "/michelangelo"
     }
     write_env(CLIENT_ENV_FILE, dic)
-    BROWSER=none
-    PORT=7777
-    BACKEND_PORT=9999
-    PUBLIC_URL=/michelangelo
+
+def install_venv():
+    print("We will now install a virtual environment.")
+
+    os.chdir(rel_path("."))
+
+    run_command("python3.8 -v venv venv")
+    run_command(". venv/bin/activate")
 
 def main():
     version = sys.version_info
@@ -187,6 +191,7 @@ def main():
         print("Install the missing software and run again.")
         return
 
+    install_venv()
     get_pip_requirements()
     install_pip_requirements()
     install_db()
