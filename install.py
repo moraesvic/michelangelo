@@ -88,9 +88,14 @@ def install_pip_requirements(pip_command):
     run_command(". venv/bin/activate")
     
     # Installing dependencies
-    run_command(f"{pip_command} install -r {TMP_FILE}")
-    "ModuleNotFoundError: No module named '_ctypes'"
-    "sudo apt install libffi-dev"
+    try:
+        run_command(f"{pip_command} install -r {TMP_FILE}")
+    except:
+        print("'pip install' exited with error. If you are getting something " +
+            """like "ModuleNotFoundError: No module named '_ctypes'" """ + 
+            "you might want to install libffi-dev (sudo apt install libffi-dev) " +
+            "and perhaps rebuild your python version")
+        raise
 
     # Removing tmp_file
     os.remove(TMP_FILE)
@@ -268,11 +273,14 @@ sudo make altinstall
     except:
         return
     
-    get_pip_requirements()
-    install_pip_requirements(pip_command)
-    install_db()
-    install_front_end()
-    instructions_nginx()
+    try:
+        get_pip_requirements()
+        install_pip_requirements(pip_command)
+        install_db()
+        install_front_end()
+        instructions_nginx()
+    except:
+        print("Installation cannot continue. Exiting...")
 
     print("\n\nWell done! You are almost ready to go. Now what you have to do is: " + 
     "go to project main folder, activate virtual environment (source ./venv/bin/activate), " + 
