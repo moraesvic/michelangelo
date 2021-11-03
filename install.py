@@ -17,7 +17,7 @@ def run_command(cmd):
     cmd = re.sub(r"[\n]+", " ", cmd)
 
     print(f"\n$ {cmd}")
-    
+
     with subprocess.Popen(
         cmd,
         shell = True,
@@ -89,7 +89,7 @@ def get_pip_requirements():
     tmp_file.close()
 
 def install_pip_requirements(pip_command):
-    print("\n\nWe will now install pip requirements.\n")
+    print("\nWe will now install pip requirements.")
     os.chdir(rel_path("."))
 
     # Source from virtual environment
@@ -190,7 +190,7 @@ def install_front_end():
     write_env(CLIENT_ENV_FILE, dic)
 
 def install_venv():
-    print("We will now install a virtual environment.")
+    print("\nWe will now install a virtual environment.")
 
     os.chdir(rel_path("."))
 
