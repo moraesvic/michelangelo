@@ -13,6 +13,14 @@ class colors:
 
 ROOT_DIR = os.path.realpath(__file__)
 
+def get_linux_uname():
+    uid = os.environ["SUDO_UID"]
+    uname = subprocess.check_output(
+        f"""getent passwd "{uid}" | cut -d: -f1""",
+        shell = True,
+        text = True)
+    return uname
+
 def rel_path(path, base_dir = ""):
     # This function is also defined elsewhere, but I wanted this to run
     # as standalone (not as a module)
@@ -247,8 +255,9 @@ def find_pip():
 
 
 def create_uploads_dir():
+    # Directory must be owned by regular user, not root
     print(f"\n{colors.CYAN}Creating uploads/ directory{colors.END}")
-    run_command(f"cd {rel_path('.')} ; mkdir uploads")
+    run_command(f"cd {rel_path('.')} ; sudo -u {get_linux_uname()} mkdir uploads")
 
 def main():
     version = sys.version_info
