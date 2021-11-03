@@ -10,7 +10,14 @@ def rel_path(path, base_dir = ""):
 
 def run_command(cmd):
     # Will output lines to screen as soon as they are received
-    print(f"$ {cmd}\n")
+
+    # Clean the command for better presentation
+    cmd = re.sub(r"[ ]{2,}", " ", cmd)
+    cmd = re.sub(r"[\t]{2,}", " ", cmd)
+    cmd = re.sub(r"[\n]+", " ", cmd)
+
+    print(f"\n$ {cmd}")
+    
     with subprocess.Popen(
         cmd,
         shell = True,
@@ -191,7 +198,7 @@ def install_venv():
     run_command(". venv/bin/activate")
 
 def instructions_nginx():
-    print("This app was made for using in production with Nginx as a reverse proxy.")
+    print("\n\nThis app was made for using in production with Nginx as a reverse proxy.")
     print("We will NOT do this configuration for you, as it might break your existing servers")
     print("We advise you to edit your conf.d file in /etc/nginx and insert the " +
         "following directive in the server block:")
