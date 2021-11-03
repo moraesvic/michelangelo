@@ -111,9 +111,9 @@ def install_pip_requirements(pip_command):
             """like "ModuleNotFoundError: No module named '_ctypes'" """ + 
             f"you might want to install libffi-dev ({colors.YELLOW}sudo apt install libffi-dev{colors.END}) " +
             "and perhaps rebuild your python version")
-        print("\n\nIf, on the other hand, the error happens when psycopg2 library " +
+        print("\nIf, on the other hand, the error happens when psycopg2 library " +
             "is installing, you might need to install libpq-dev " +
-            f"({colors.YELLOW}sudo apt-get install libpq-dev{colors.END})\n")
+            f"({colors.YELLOW}sudo apt install libpq-dev{colors.END})\n")
         raise
 
     # Removing tmp_file
@@ -246,8 +246,7 @@ def find_pip():
 
 def create_uploads_dir():
     print(f"\n{colors.CYAN}Creating uploads/ directory{colors.END}")
-    os.chdir(rel_path("."))
-    os.mkdir("uploads")
+    run_command(f"cd {rel_path('.')} ; mkdir uploads")
 
 def main():
     version = sys.version_info
