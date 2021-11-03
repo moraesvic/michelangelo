@@ -329,8 +329,8 @@ sudo make altinstall
     "\tsource ./venv/bin/activate\n" +
     "\t./scripts/run_dev &\n" +
     "\t(^ you will need to let this running in the background)\n\n" +
-    "\t./scripts/run_tests\n\n" +
-    "\tpython3.8 -m scripts.populate_db\n" +
+    "\t./scripts/run_tests\n" +
+    "\tpython3.8 -m scripts.populate_db\n\n" +
     "\t(you can now stop the development environment)\n" +
     "\t./scripts/run_prod\n")
 
