@@ -1,6 +1,16 @@
 #!/usr/bin/env python3.8
 import os, re, subprocess, sys
 
+class colors:
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    END = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 def rel_path(path, base_dir = ""):
     # This function is also defined elsewhere, but I wanted this to run
     # as standalone (not as a module)
@@ -16,7 +26,7 @@ def run_command(cmd):
     cmd = re.sub(r"[\t]{2,}", " ", cmd)
     cmd = re.sub(r"[\n]+", " ", cmd)
 
-    print(f"\n$ {cmd}")
+    print(f"\n{colors.YELLOW}$ {cmd}{colors.END}")
 
     with subprocess.Popen(
         cmd,
@@ -89,7 +99,7 @@ def get_pip_requirements():
     tmp_file.close()
 
 def install_pip_requirements(pip_command):
-    print("\nWe will now install pip requirements.")
+    print(f"\n{colors.cyan}We will now install pip requirements.{colors.end}")
     os.chdir(rel_path("."))
 
     # Source from virtual environment
@@ -124,7 +134,7 @@ def change_env(uname, password, database, host, port):
     write_env(ENV_FILE, current_env)
 
 def install_db():
-    print("\n\nWe will now install the database.\n")
+    print(f"\n{colors.cyan}We will now install the database.\n{colors.end}")
 
     uname = input("Please type in the username.  ")
     password = input("Now type in the password. (Sorry, we will echo it to screen, please make sure nobody is looking ¯\_(ツ)_/¯)  ")
@@ -175,7 +185,7 @@ def check_dependencies(dependencies):
             raise
 
 def install_front_end():
-    print("We will now proceed with the front-end installation")
+    print(f"{colors.cyan}We will now proceed with the front-end installation{colors.end}")
 
     os.chdir(rel_path("./client"))
 
@@ -198,7 +208,8 @@ def install_venv():
     run_command(". venv/bin/activate")
 
 def instructions_nginx():
-    print("\n\nThis app was made for using in production with Nginx as a reverse proxy.")
+    print(f"\n{colors.cyan}INSTRUCTIONS FOR NGINX{colors.end}\n")
+    print("This app was made for using in production with Nginx as a reverse proxy.")
     print("We will NOT do this configuration for you, as it might break your existing servers")
     print("We advise you to edit your conf.d file in /etc/nginx and insert the " +
         "following directive in the server block:")
@@ -288,10 +299,10 @@ sudo make altinstall
         install_front_end()
         instructions_nginx()
     except:
-        print("Installation cannot continue. Exiting...")
+        print(f"{colors.red}Installation cannot continue. Exiting...{colors.end}")
         return
 
-    print("\n\nWell done! You are almost ready to go. Now what you have to do is: " + 
+    print(f"\n\n{colors.yellow}Well done!{colors.end} You are almost ready to go. Now what you have to do is: " + 
     "go to project main folder, activate virtual environment (source ./venv/bin/activate), " + 
     "run the development server (./scripts/run_dev) " +
     "and do the tests (./scripts/run_tests).\n\n" +
@@ -308,7 +319,7 @@ sudo make altinstall
     "(you can now stop the development environment)\n" +
     "./scripts/run_prod\n")
 
-    print("If anything doesn't work, keep calm and don't panic.")
+    print(f"{colors.cyan}If anything doesn't work, keep calm and don't panic.{colors.end}")
 
 if __name__ == "__main__":
     main()
