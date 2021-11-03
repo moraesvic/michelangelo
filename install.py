@@ -181,7 +181,7 @@ def check_dependencies(dependencies):
             raise
 
 def install_front_end():
-    print(f"{colors.CYAN}We will now proceed with the front-end installation{colors.END}")
+    print(f"\n{colors.CYAN}We will now proceed with the front-end installation{colors.END}")
 
     os.chdir(rel_path("./client"))
 
@@ -245,7 +245,8 @@ def find_pip():
 
 def create_uploads_dir():
     print(f"\n{colors.CYAN}Creating uploads/ directory{colors.END}")
-    os.mkdir(rel_path("uploads"))
+    os.chdir(rel_path("."))
+    os.mkdir("uploads")
 
 def main():
     version = sys.version_info
@@ -279,9 +280,11 @@ sudo make altinstall
         return
 
     try:
-        check_dependencies(["psql", "npm"])
+        check_dependencies(["psql", "npm", "exiftool", "convert", "compare"])
     except subprocess.CalledProcessError:
+        print(f"{colors.RED}ERROR!{colors.END}")
         print("Install the missing software and run again.")
+        print('TIP: "convert" and "compare" can be found in the "imagemagick" package')
         return
 
     install_venv()
