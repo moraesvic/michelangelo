@@ -173,7 +173,6 @@ def install_front_end():
     os.chdir(rel_path("./client"))
 
     run_command("npm install")
-    run_command("npm audit fix")
 
     dic = {
         "BROWSER": "none",
@@ -288,7 +287,8 @@ sudo make altinstall
     print("\n\nWell done! You are almost ready to go. Now what you have to do is: " + 
     "go to project main folder, activate virtual environment (source ./venv/bin/activate), " + 
     "run the development server (./scripts/run_dev) " +
-    "and do the tests (./scripts/run_tests). If everything is ok, go ahead and " +
+    "and do the tests (./scripts/run_tests).\n\n" +
+    "If everything is ok, go ahead and " +
     "populate the database (./scripts/populate_db.py). Then, you can finally "
     "run the server in production mode (./scripts/run_prod)\n")
 
