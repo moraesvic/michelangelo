@@ -101,13 +101,10 @@ def get_pip_requirements():
 def install_pip_requirements(pip_command):
     print(f"\n{colors.CYAN}We will now install pip requirements.{colors.END}")
     os.chdir(rel_path("."))
-
-    # Source from virtual environment
-    run_command(". venv/bin/activate")
     
     # Installing dependencies
     try:
-        run_command(f"{pip_command} install -r {TMP_FILE}")
+        run_command(f". venv/bin/activate ; {pip_command} install -r {TMP_FILE}")
     except:
         print("\n\n'pip install' exited with error. If you are getting something " +
             """like "ModuleNotFoundError: No module named '_ctypes'" """ + 
@@ -204,7 +201,6 @@ def install_venv():
     os.chdir(rel_path("."))
 
     run_command("python3.8 -m venv venv")
-    run_command(". venv/bin/activate")
 
 def instructions_nginx():
     print(f"\n{colors.CYAN}INSTRUCTIONS FOR NGINX{colors.END}\n")
