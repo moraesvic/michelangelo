@@ -163,7 +163,6 @@ sudo -i -u postgres \
     files.sort()
 
     for file in files:
-        print(f"Installing file {file}")
         import_command = f"""       \
 PGPASSWORD="{password}" \
 psql -U "{uname}"       \
@@ -302,7 +301,7 @@ sudo make altinstall
         print(f"{colors.RED}Installation cannot continue. Exiting...{colors.END}")
         return
 
-    print(f"\n\n{colors.YELLOW}Well done!{colors.END} You are almost ready to go. Now what you have to do is: " + 
+    print(f"\n\n{colors.GREEN}Well done!{colors.END} You are almost ready to go. Now what you have to do is: " + 
     "go to project main folder, activate virtual environment (source ./venv/bin/activate), " + 
     "run the development server (./scripts/run_dev) " +
     "and do the tests (./scripts/run_tests).\n\n" +
@@ -310,14 +309,14 @@ sudo make altinstall
     "populate the database (./scripts/populate_db.py). Then, you can finally "
     "run the server in production mode (./scripts/run_prod)\n")
 
-    print("TL;DR\n\n" + 
-    "cd path/to/michelangelo\n" +
-    "source ./venv/bin/activate\n" +
-    "./scripts/run_dev &\n" +
-    "(^ you will need to let this running in the background)\n\n" +
-    "./scripts/run_tests\n\n" +
-    "(you can now stop the development environment)\n" +
-    "./scripts/run_prod\n")
+    print(f"{colors.CYAN}TL;DR{colors.END}\n\n" + 
+    "\tcd path/to/michelangelo\n" +
+    "\tsource ./venv/bin/activate\n" +
+    "\t./scripts/run_dev &\n" +
+    "\t(^ you will need to let this running in the background)\n\n" +
+    "\t./scripts/run_tests\n\n" +
+    "\t(you can now stop the development environment)\n" +
+    "\t./scripts/run_prod\n")
 
     print(f"{colors.CYAN}If anything doesn't work, keep calm and don't panic.{colors.END}")
 
