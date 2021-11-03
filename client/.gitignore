@@ -22,8 +22,4 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Normally, we would ignore ".env" file. I am just keeping it on GitHub for
-# pedagogical purposes, so other people installing this can know what
-# variables ".env" should contain.
-
-# .env
+.env
