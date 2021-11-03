@@ -243,6 +243,10 @@ def find_pip():
                 raise
 
 
+def create_uploads_dir():
+    print(f"\n{colors.CYAN}Creating uploads/ directory{colors.END}")
+    os.mkdir(rel_path("uploads"))
+
 def main():
     version = sys.version_info
     if version.major != 3 or version.minor != 8:
@@ -293,6 +297,7 @@ sudo make altinstall
         install_db()
         install_front_end()
         instructions_nginx()
+        create_uploads_dir()
     except:
         print(f"{colors.RED}Installation cannot continue. Exiting...{colors.END}")
         return
