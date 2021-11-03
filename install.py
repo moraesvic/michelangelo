@@ -99,7 +99,7 @@ def get_pip_requirements():
     tmp_file.close()
 
 def install_pip_requirements(pip_command):
-    print(f"\n{colors.cyan}We will now install pip requirements.{colors.end}")
+    print(f"\n{colors.CYAN}We will now install pip requirements.{colors.END}")
     os.chdir(rel_path("."))
 
     # Source from virtual environment
@@ -134,7 +134,7 @@ def change_env(uname, password, database, host, port):
     write_env(ENV_FILE, current_env)
 
 def install_db():
-    print(f"\n{colors.cyan}We will now install the database.\n{colors.end}")
+    print(f"\n{colors.CYAN}We will now install the database.\n{colors.END}")
 
     uname = input("Please type in the username.  ")
     password = input("Now type in the password. (Sorry, we will echo it to screen, please make sure nobody is looking ¯\_(ツ)_/¯)  ")
@@ -185,7 +185,7 @@ def check_dependencies(dependencies):
             raise
 
 def install_front_end():
-    print(f"{colors.cyan}We will now proceed with the front-end installation{colors.end}")
+    print(f"{colors.CYAN}We will now proceed with the front-end installation{colors.END}")
 
     os.chdir(rel_path("./client"))
 
@@ -208,7 +208,7 @@ def install_venv():
     run_command(". venv/bin/activate")
 
 def instructions_nginx():
-    print(f"\n{colors.cyan}INSTRUCTIONS FOR NGINX{colors.end}\n")
+    print(f"\n{colors.CYAN}INSTRUCTIONS FOR NGINX{colors.END}\n")
     print("This app was made for using in production with Nginx as a reverse proxy.")
     print("We will NOT do this configuration for you, as it might break your existing servers")
     print("We advise you to edit your conf.d file in /etc/nginx and insert the " +
@@ -299,10 +299,10 @@ sudo make altinstall
         install_front_end()
         instructions_nginx()
     except:
-        print(f"{colors.red}Installation cannot continue. Exiting...{colors.end}")
+        print(f"{colors.RED}Installation cannot continue. Exiting...{colors.END}")
         return
 
-    print(f"\n\n{colors.yellow}Well done!{colors.end} You are almost ready to go. Now what you have to do is: " + 
+    print(f"\n\n{colors.YELLOW}Well done!{colors.END} You are almost ready to go. Now what you have to do is: " + 
     "go to project main folder, activate virtual environment (source ./venv/bin/activate), " + 
     "run the development server (./scripts/run_dev) " +
     "and do the tests (./scripts/run_tests).\n\n" +
@@ -319,7 +319,7 @@ sudo make altinstall
     "(you can now stop the development environment)\n" +
     "./scripts/run_prod\n")
 
-    print(f"{colors.cyan}If anything doesn't work, keep calm and don't panic.{colors.end}")
+    print(f"{colors.CYAN}If anything doesn't work, keep calm and don't panic.{colors.END}")
 
 if __name__ == "__main__":
     main()
