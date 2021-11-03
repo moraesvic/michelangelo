@@ -106,13 +106,14 @@ def install_pip_requirements(pip_command):
     try:
         run_command(f". venv/bin/activate ; {pip_command} install -r {TMP_FILE}")
     except:
-        print("\n\n'pip install' exited with error. If you are getting something " +
+        print(f"\n{colors.RED}ERROR!{colors.END}")
+        print("'pip install' exited with error. If you are getting something " +
             """like "ModuleNotFoundError: No module named '_ctypes'" """ + 
-            "you might want to install libffi-dev (sudo apt install libffi-dev) " +
+            f"you might want to install libffi-dev ({colors.YELLOW}sudo apt install libffi-dev{colors.END}) " +
             "and perhaps rebuild your python version")
         print("\n\nIf, on the other hand, the error happens when psycopg2 library " +
             "is installing, you might need to install libpq-dev " +
-            "(sudo apt-get install libpq-dev)\n")
+            f"({colors.YELLOW}sudo apt-get install libpq-dev{colors.END})\n")
         raise
 
     # Removing tmp_file
@@ -196,7 +197,7 @@ def install_front_end():
     write_env(CLIENT_ENV_FILE, dic)
 
 def install_venv():
-    print("\nWe will now install a virtual environment.")
+    print(f"\n{colors.CYAN}We will now install a virtual environment.{colors.END}")
 
     os.chdir(rel_path("."))
 
@@ -239,7 +240,7 @@ def find_pip():
                 subprocess.run(f"which pip3.8", shell=True, check=True)
                 return "pip3.8"
             except subprocess.CalledProcessError:
-                print(f"It seems like pip is not installed in your computer.")
+                print(f"{colors.RED}ERROR!{colors.END} It seems like pip is not installed in your computer.")
                 raise
 
 
