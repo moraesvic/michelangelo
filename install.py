@@ -91,10 +91,13 @@ def install_pip_requirements(pip_command):
     try:
         run_command(f"{pip_command} install -r {TMP_FILE}")
     except:
-        print("'pip install' exited with error. If you are getting something " +
+        print("\n\n'pip install' exited with error. If you are getting something " +
             """like "ModuleNotFoundError: No module named '_ctypes'" """ + 
             "you might want to install libffi-dev (sudo apt install libffi-dev) " +
             "and perhaps rebuild your python version")
+        print("\n\nIf, on the other hand, the error happens when psycopg2 library " +
+            "is installing, you might need to install libpq-dev " +
+            "(sudo apt-get install libpq-dev)\n")
         raise
 
     # Removing tmp_file
@@ -281,6 +284,7 @@ sudo make altinstall
         instructions_nginx()
     except:
         print("Installation cannot continue. Exiting...")
+        return
 
     print("\n\nWell done! You are almost ready to go. Now what you have to do is: " + 
     "go to project main folder, activate virtual environment (source ./venv/bin/activate), " + 
