@@ -11,11 +11,13 @@ class colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+ROOT_DIR = os.path.realpath(__file__)
+
 def rel_path(path, base_dir = ""):
     # This function is also defined elsewhere, but I wanted this to run
     # as standalone (not as a module)
     if not base_dir:
-        base_dir = os.path.dirname(os.path.realpath(__file__))
+        base_dir = os.path.dirname(ROOT_DIR)
     return os.path.join(base_dir, path)
 
 def run_command(cmd):
