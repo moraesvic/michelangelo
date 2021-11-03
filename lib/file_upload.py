@@ -85,7 +85,7 @@ def save_pic(
 
     return (file_path, md5)
 
-def process_pic(path: str, max_size: int = 800) -> str:
+def process_pic(path: str, max_size: int = 600) -> str:
     try:
         pic_utils.strip_pic_metadata(path)
         pic_utils.resize(path, max_size)

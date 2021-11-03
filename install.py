@@ -280,7 +280,7 @@ sudo make altinstall
         return
 
     try:
-        check_dependencies(["psql", "npm", "exiftool", "convert", "compare"])
+        check_dependencies(["psql", "npm", "exiftool", "convert", "compare", "nginx"])
     except subprocess.CalledProcessError:
         print(f"{colors.RED}ERROR!{colors.END}")
         print("Install the missing software and run again.")
@@ -310,7 +310,7 @@ sudo make altinstall
     "run the development server (./scripts/run_dev) " +
     "and do the tests (./scripts/run_tests).\n\n" +
     "If everything is ok, go ahead and " +
-    "populate the database (./scripts/populate_db.py). Then, you can finally "
+    "populate the database (python3.8 -m scripts.populate_db). Then, you can finally "
     "run the server in production mode (./scripts/run_prod)\n")
 
     print(f"{colors.CYAN}TL;DR{colors.END}\n\n" + 
@@ -319,6 +319,7 @@ sudo make altinstall
     "\t./scripts/run_dev &\n" +
     "\t(^ you will need to let this running in the background)\n\n" +
     "\t./scripts/run_tests\n\n" +
+    "\tpython3.8 -m scripts.populate_db\n" +
     "\t(you can now stop the development environment)\n" +
     "\t./scripts/run_prod\n")
 
