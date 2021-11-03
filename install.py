@@ -14,11 +14,13 @@ def run_command(cmd):
         cmd,
         shell = True,
         text = True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT
+        stdout = subprocess.PIPE,
+        stderr = subprocess.STDOUT
     ) as proc:
         for line in proc.stdout:
             print(line, end="", flush=True)
+    if proc.returncode != 0:
+        raise Exception(f"Error! Command <{cmd}> exited with non-zero status!")
 
 def read_env(path):
     f = open(path, "r")
@@ -87,6 +89,8 @@ def install_pip_requirements(pip_command):
     
     # Installing dependencies
     run_command(f"{pip_command} install -r {TMP_FILE}")
+    "ModuleNotFoundError: No module named '_ctypes'"
+    "sudo apt install libffi-dev"
 
     # Removing tmp_file
     os.remove(TMP_FILE)
