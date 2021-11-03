@@ -10,6 +10,7 @@ def rel_path(path, base_dir = ""):
 
 def run_command(cmd):
     # Will output lines to screen as soon as they are received
+    print(f"$ {cmd}\n")
     with subprocess.Popen(
         cmd,
         shell = True,
@@ -106,7 +107,6 @@ def install_pip_requirements(pip_command):
 def change_env(uname, password, database, host, port):
     current_env = read_env(ENV_FILE)
 
-    print(current_env)
     current_env["POSTGRES_USER"] = uname
     current_env["POSTGRES_PASSWORD"] = password
     current_env["POSTGRES_DATABASE"] = database
@@ -114,7 +114,6 @@ def change_env(uname, password, database, host, port):
     current_env["POSTGRES_PORT"] = port
     current_env["APP_NAME"] = "michelangelo"
 
-    print(current_env)
     write_env(ENV_FILE, current_env)
 
 def install_db():
@@ -163,8 +162,8 @@ psql -U "{uname}"       \
 def check_dependencies(dependencies):
     for dep in dependencies:
         try:
-            subprocess.run(f"which {dep}", shell=True, check=True)
-        except subprocess.CalledProcessError:
+            run_command(f"which {dep}")
+        except:
             print(f"It seems like {dep} is not installed in your computer.")
             raise
 
