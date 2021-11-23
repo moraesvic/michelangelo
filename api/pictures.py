@@ -1,8 +1,7 @@
 from flask import request as req, jsonify, send_file
 import os
 
-import lib.file_upload as file_upload
-import lib.exceptions as exceptions
+from lib import file_upload, exceptions
 
 # This belongs here (logically) but gets called by products.py
 def decrease_picture_count(db, pic_id):
