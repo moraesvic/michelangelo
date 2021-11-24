@@ -5,7 +5,23 @@ this_dir="$(dirname "$0")"
 root_dir="$this_dir/.."
 source "$root_dir/venv/bin/activate"
 
+# We will run production and client server concurrently. For that, we launch
+# the process for the client in the background and save its PID.
+# When the back-end server stops running, the front-end should stop too.
+
+cd "$root_dir/client"
+npm run start &
+pid=$!
+
+echo "client server's pid is $pid"
+
+cd ..
 export FLASK_APP="$root_dir/app.py"
 export FLASK_ENV="development"
-export PORT=7777
+export PORT=9999
 flask run --port="$PORT"
+
+# When back-end server is interrupted, front-end server should be as well.
+# SIGTERM(15) allows the process to exit gracefully and clean.
+
+kill -15 $pid

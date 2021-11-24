@@ -1,8 +1,93 @@
+Development environment for michelangelo (02/11/2021)
+
+Please note that it is not STRICTLY required that EVERYTHING below follows the given version. For example, you will likely be fine running other Linux distro, another version of nginx, PostgreSQL and so on. Tests are designed to be tolerant enough and do not expect absolutely exact output, unless it is really necessary. In spite of that, if you have a problem reproducing the app's behavior, this could be a place to start debugging.
+
+>>> Let's start with system requirements:
+$ uname -a
+Linux linuxmint 5.4.0-89-generic #100-Ubuntu SMP Fri Sep 24 14:50:10 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
+
+
+>>> Now python requirements.
+$ python -V
+Python 3.8.10
+
+
+>>> You might want to paste the output of the following command to a separate file and run "pip install -r FILE"
+$ pip freeze
+certifi==2021.10.8
+charset-normalizer==2.0.7
 click==8.0.3
 Flask==2.0.2
+idna==3.3
 itsdangerous==2.0.1
 Jinja2==3.0.2
 MarkupSafe==2.0.1
+psycopg2==2.9.1
 python-dotenv==0.19.1
+requests==2.26.0
+urllib3==1.26.7
 waitress==2.0.0
 Werkzeug==2.0.2
+
+
+>>> pip
+$ pip -V
+pip 20.0.2 from /home/dinossauro/webdev/michelangelo/venv/lib/python3.8/site-packages/pip (python 3.8)
+
+
+>>> PostgreSQL
+$ psql -V
+psql (PostgreSQL) 12.8 (Ubuntu 12.8-0ubuntu0.20.04.1)
+
+
+>>> npm (package manager for the front-end)
+$ npm -v
+6.14.4
+
+
+>>> nginx
+$ nginx -v
+nginx version: nginx/1.18.0 (Ubuntu)
+
+
+>>> Other command line tools
+$ bash --version
+GNU bash, version 5.0.17(1)-release (x86_64-pc-linux-gnu)
+Copyright (C) 2019 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+
+This is free software; you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+$ git --version
+git version 2.25.1
+
+$ dd --version
+dd (coreutils) 8.30
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by Paul Rubin, David MacKenzie, and Stuart Kemp.
+
+$ exiftool -ver
+11.88
+
+$ convert -version
+Version: ImageMagick 6.9.10-23 Q16 x86_64 20190101 https://imagemagick.org
+Copyright: © 1999-2019 ImageMagick Studio LLC
+License: https://imagemagick.org/script/license.php
+Features: Cipher DPC Modules OpenMP
+Delegates (built-in): bzlib djvu fftw fontconfig freetype jbig jng jpeg lcms lqr ltdl lzma openexr pangocairo png tiff webp wmf x xml zlib
+
+$ compare -version
+Version: ImageMagick 6.9.10-23 Q16 x86_64 20190101 https://imagemagick.org
+Copyright: © 1999-2019 ImageMagick Studio LLC
+License: https://imagemagick.org/script/license.php
+Features: Cipher DPC Modules OpenMP
+Delegates (built-in): bzlib djvu fftw fontconfig freetype jbig jng jpeg lcms lqr ltdl lzma openexr pangocairo png tiff webp wmf x xml zlib
+
+$ cloc --version
+1.82
+

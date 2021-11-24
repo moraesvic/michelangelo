@@ -1,8 +1,10 @@
-
-.nav-bar {
+.nav-bar-wrapper {
     position: fixed;
     top: 0px;
+}
 
+
+.nav-bar {
     background-color: rgb(28, 0, 92);
     color: white;
     
@@ -40,4 +42,11 @@
 .nav-item {
     font-weight: 700;
     margin: 10px;
+}
+
+.reminder-dev-mode {
+    color: white;
+    font-weight: 900;
+    background-color: rgb(126, 0, 0);
+    text-align: center;
 }

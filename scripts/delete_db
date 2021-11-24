@@ -1,13 +1,4 @@
 #!/usr/bin/env bash
 
-get_env="./lib/bash_common/get_env $(dirname "$0")/client/.env"
-
-public_url=$($get_env PUBLIC_URL)
-host="vulpi-davinci.localdev"
-url="$host/$public_url/products/all"
-url="http://${url/\/\//\/}"
-
-echo "DELETE request will be sent to $url"
-
-curl -L -X DELETE "$url"
-echo ""
+curl -v -X DELETE "http://localhost:7777/michelangelo/products/all"
+curl -v -X DELETE "http://localhost:7777/michelangelo/pictures/all"

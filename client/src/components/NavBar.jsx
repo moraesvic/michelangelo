@@ -1,5 +1,16 @@
 import "./NavBar.css";
-import DynLink from './DynLink';
+import * as myPath from "../js/myPath";
+
+function ReminderDevMode(props)
+{
+    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development')
+        return (
+            <div className="reminder-dev-mode">
+                ⚠️ You are in development mode ⚠️
+            </div>
+        );
+    return null;
+}
 
 function NavBar(props) {
     /*
@@ -13,19 +24,24 @@ function NavBar(props) {
     let dropdownIndex = 0;
     
     return (
+    <div className="nav-bar-wrapper">
     <nav className="nav-bar">
     
         <div className="nav-title">
-            <DynLink endpoint="/" text={props.title} />
+            <a href={myPath.getRootPath()}>{props.title}</a>
         </div>
         { props.dropdowns.map( dropdown => {
             return (
                 <div className="nav-item" key={`nav-item-${dropdownIndex++}`}>
-                    <DynLink endpoint={dropdown.endpoint} text={dropdown.title} />
+                    <a href={myPath.linkTo(dropdown.endpoint)}>
+                        {dropdown.title}
+                    </a>
                 </div>
             );
         })}
     </nav>
+    <ReminderDevMode />
+    </div>
     );
 }
 

@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+this_dir="$(dirname "$0")"
+root_dir="$this_dir/.."
+
+cd "$root_dir"
+source $root_dir/venv/bin/activate
+
+requirements_document="$root_dir/requirements.txt"
+
+function printr {
+    # Appends requirements to requirements document
+    if [ $# -eq 0 ] ; then
+        while read line ; do
+            echo -e "$line" | tee -a "$requirements_document"
+        done < "${1:-/dev/stdin}"
+    else
+        echo -e "$@" | tee -a "$requirements_document"
+    fi
+
+    # echo -e "$output" | tee -a "$requirements_document"
+
+    
+}
+
+function simulate_command {
+    # Simulates that you typed the command into a shell
+    printr "$ $@"
+    $@ 2>&1 | printr #tee -a "$requirements_document"
+    printr ""
+}
+
+# First, let's empty the file
+printf "" > "$requirements_document"
+
+###
+
+project_name="michelangelo"
+
+uname_a="uname -a"
+
+python_version="python -V"
+pip_freeze="pip freeze"
+
+pip_version="pip -V"
+
+psql_version="psql -V"
+
+npm_version="npm -v"
+
+# For some weird reason, nginx version outputs to stderr
+nginx_version="nginx -v"
+
+bash_version="bash --version"
+git_version="git --version"
+dd_version="dd --version"
+file_version="file -v"
+exiftool_version="exiftool -ver"
+convert_version="convert -version"
+compare_version="compare -version"
+cloc_version="cloc --version"
+
+###
+
+printr "Development environment for $project_name ($(date +%d/%m/%Y))"
+printr "\nPlease note that it is not STRICTLY required that EVERYTHING below follows the given version. For example, you will likely be fine running other Linux distro, another version of nginx, PostgreSQL and so on. Tests are designed to be tolerant enough and do not expect absolutely exact output, unless it is really necessary. In spite of that, if you have a problem reproducing the app's behavior, this could be a place to start debugging."
+
+printr "\n>>> Let's start with system requirements:"
+simulate_command $uname_a
+
+printr "\n>>> Now python requirements."
+simulate_command $python_version
+printr "\n>>> You might want to paste the output of the following command to a separate file and run \"pip install -r FILE\""
+simulate_command $pip_freeze
+
+printr "\n>>> pip"
+simulate_command $pip_version
+
+printr "\n>>> PostgreSQL"
+simulate_command $psql_version
+
+printr "\n>>> npm (package manager for the front-end)"
+simulate_command $npm_version
+
+printr "\n>>> nginx"
+simulate_command $nginx_version
+
+printr "\n>>> Other command line tools"
+simulate_command $bash_version
+simulate_command $git_version
+simulate_command $dd_version
+simulate_command $exiftool_version
+simulate_command $convert_version
+simulate_command $compare_version
+simulate_command $cloc_version

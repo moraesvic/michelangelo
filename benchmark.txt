@@ -1,0 +1,52 @@
+$ ab -k -H "Accept-Encoding: gzip, deflate" -n 500 -c 50 vulpi-ideas.com/michelangelo/porducts
+
+This is ApacheBench, Version 2.3 <$Revision: 1843412 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking vulpi-ideas.com (be patient)
+Completed 100 requests
+Completed 200 requests
+Completed 300 requests
+Completed 400 requests
+Completed 500 requests
+Finished 500 requests
+
+
+Server Software:        nginx/1.20.1
+Server Hostname:        vulpi-ideas.com
+Server Port:            80
+
+Document Path:          /michelangelo/porducts
+Document Length:        169 bytes
+
+Concurrency Level:      50
+Time taken for tests:   2.242 seconds
+Complete requests:      500
+Failed requests:        0
+Non-2xx responses:      500
+Keep-Alive requests:    500
+Total transferred:      194500 bytes
+HTML transferred:       84500 bytes
+Requests per second:    223.01 [#/sec] (mean)
+Time per request:       224.201 [ms] (mean)
+Time per request:       4.484 [ms] (mean, across all concurrent requests)
+Transfer rate:          84.72 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   20  60.4      0     205
+Processing:   132  157  26.4    144     221
+Waiting:      132  157  26.4    144     221
+Total:        132  177  78.9    144     419
+
+Percentage of the requests served within a certain time (ms)
+  50%    144
+  66%    152
+  75%    164
+  80%    204
+  90%    402
+  95%    405
+  98%    405
+  99%    405
+ 100%    419 (longest request)

@@ -4,6 +4,7 @@ import "./MainContent.css";
 import ProductForm from './ProductForm';
 import Products from "./Products";
 import FourOFour from "./FourOFour";
+import SingleProduct from "./SingleProduct"
 
 
 function Navigator()
@@ -18,12 +19,14 @@ function Navigator()
         :
         null;
 
-    switch(pathName){
-    case "":
-    case "/":
-    case "/view":
+    switch(true){
+    case /^(\/?|\/view)$/.test(pathName):
         return <Products />;
-    case "/insert":
+    case /^(\/?|\/view)\/[0-9]+$/.test(pathName):
+        const productId = 
+            parseInt(pathName.match(/^\/view\/([0-9]+)$/)[1]);
+        return <SingleProduct id={productId} />;
+    case /^\/insert$/.test(pathName):
         return (
         <ProductForm
             action="/products"

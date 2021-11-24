@@ -1,0 +1,62 @@
+.center {
+    text-align: center;
+}
+
+.back-button, .edit-button, .delete-button {
+    color: white;
+    font-weight: 900;
+
+    padding: 3px;
+    margin: 2px;
+    border-width: 2px;
+    border-style: outset;
+    border-color: rgb(118, 118, 118), rgb(133, 133, 133);
+}
+
+.back-button {
+    background-color: black;
+}
+
+.edit-button {
+    background-color: rgb(32, 96, 99);
+}
+
+.delete-button {
+    background-color: crimson;
+}
+
+.back-button:hover, .edit-button:hover, .delete-button:hover {
+    cursor: pointer;
+}
+
+.product-page {
+    text-align: center;
+}
+
+.prod-descr {
+    text-align: justify;
+    max-width: 35%;
+    margin: auto;
+}
+
+@media (max-width: 800px)
+{
+    .prod-descr {
+        max-width: 60%
+    }
+}
+
+@media (max-width: 640px)
+{
+    .prod-descr {
+        max-width: 85%
+    }
+}
+
+.prod-price {
+    font-weight: 700;
+}
+
+.prod-instock {
+    font-size: smaller;
+}

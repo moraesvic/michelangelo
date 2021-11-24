@@ -1,4 +1,4 @@
-CREATE TABLE products (
+CREATE TABLE IF NOT EXISTS products (
     prod_id         BIGSERIAL NOT NULL PRIMARY KEY,
     prod_name       TEXT NOT NULL,
     prod_descr      TEXT,

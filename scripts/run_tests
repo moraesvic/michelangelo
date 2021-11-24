@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+this_dir="$(dirname "$0")"
+root_dir="$this_dir/.."
+
+# Generate large file for testing
+
+large_file="$root_dir/tests/test_files/large_file.bin"
+if [ ! -f "$large_file" ] ; then
+    dd if=/dev/urandom of="$large_file" bs=1024 count=$((10 * 1024))
+fi
+
+# Check whether we're running in verbose mode
+verbose=0
+for arg in $@ ; do
+    if [[ "$arg" =~ -[vV]+ ]] ; then
+        echo "You are running in verbose mode"
+        verbose=1
+        break
+    fi
+done
+
+flag=""
+if ((verbose)) ; then
+    flag="-v"
+fi
+
+for file in $root_dir/tests/*.py ; do
+    module_name="$(basename "$file")"
+    if [ "$module_name" = "test_common.py" ] ; then
+        continue
+    fi
+    echo "running test ${module_name%%.*}"
+    python3.8 -m "tests.${module_name%%.*}" $flag
+done

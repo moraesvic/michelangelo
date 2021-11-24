@@ -1,0 +1,15 @@
+.confirm-delete {
+    color: white;
+    font-weight: 900;
+    background-color: crimson;
+
+    padding: 3px;
+    margin: 2px;
+    border-width: 2px;
+    border-style: outset;
+    border-color: rgb(118, 118, 118), rgb(133, 133, 133);
+}
+
+.confirm-delete {
+    cursor: pointer;
+}

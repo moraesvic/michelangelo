@@ -1,3 +1,5 @@
+import * as myPath from "./myPath";
+
 async function myFetch(url, params)
 {
 	let response = await fetch(url, params);
@@ -32,8 +34,7 @@ async function HTTPRequest(url, path, payload, query, method)
 		*/
 	checkType(path, payload, query);
 
-	let prefix = process.env.PUBLIC_URL;
-	let newUrl = `${prefix}/${url}`.replace(/\/\//g,'/');
+	let newUrl = myPath.linkTo(url);
 	
 	if (path)
 		for (let subpath of path)
