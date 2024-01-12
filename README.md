@@ -12,7 +12,11 @@ This is the Python (Flask) rewrite of a project I originally did with Node.js. Y
 
 ![Screenshot 1](/screenshot-1.png)
 
+---
+
 ![Screenshot 2](/screenshot-2.png)
+
+---
 
 ![Screenshot 3](/screenshot-3.png)
 
