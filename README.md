@@ -2,11 +2,19 @@
 
 This repository was created in November 2021 as an coding assignment for a job application. Please take it with a grain of salt, as it does not represent my current abilities.
 
+In particular, installation is too complicated and should be standardized by using modern practices such as Dockerization.
+
 ## Michelangelo
 
 This is the Python (Flask) rewrite of a project I originally did with Node.js. You can check the original project at [GitHub](https://github.com/moraesvic/davinci) (although you probably shouldn't, this Python version is better written and better tested).
 
 **MICHELANGELO** is a fashion store for clothes you would find from the 17th to the end of 19th century. You will find everything, Victorian clothes, pirate clothes, royalty, French Revolution and so on!
+
+![Screenshot 1](/screenshot-1.png)
+
+![Screenshot 2](/screenshot-2.png)
+
+![Screenshot 3](/screenshot-3.png)
 
 ## Installation
 
